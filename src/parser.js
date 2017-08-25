@@ -180,6 +180,7 @@ class parser
 		                                                                                                // temperature = analog1;//send analog 1 inplace of temperature;
 		// console.log()
 		// temperature = 0.0625;
+		temperature = temperature * 0.625;
 		temperature = (temperature+60) * 256
 		                                                                                                console.log("temperature (in enclosure...):"+temperature)
 		packet33chars.push((temperature<<(sizeoftemperature-2*8))>>(sizeoftemperature-2*8)>>(1*8))

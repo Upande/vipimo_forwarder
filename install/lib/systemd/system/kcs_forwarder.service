@@ -1,0 +1,14 @@
+[Unit]
+Description=Lorank activation
+
+[Service]
+User=nobody
+Group=nogroup
+WorkingDirectory=/
+ExecStart=~/kcs_forwarder/start
+SyslogIdentifier=kcs_forwarder
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+KCS package for SpringNode A2D2T revB with A2D2T_KCS firmware
+
+Byte	Size	Order		Signedness	Description
+0		1		N/A			N/A			Fixed value: 0x24
+1..12	12		N/A			N/A			Filler
+13..14	2		MSB first	Signed		Value of analog input 1. For default situation: current trough 50 ohms resistor, measured as 11 bits value such that 2048 counts correspond to 1.024V. 1 count corresponds to 0.0005V, which corresponds to 0.01mA. To get the value in milliamps, divide by 100.
+15		1		N/A			N/A			Status of digital input 1. Value: 0x43 when open or high; 0x41 when closed or low.
+16..17	2		MSB first	Signed		Value of analog input 2. For default situation: current trough 50 ohms resistor, measured as 11 bits value such that 2048 counts correspond to 1.024V. 1 count corresponds to 0.0005V, which corresponds to 0.01mA. To get the value in milliamps, divide by 100.
+18		1		N/A			N/A			Status of digital input 2. Value: 0x43 when open or high; 0x41 when closed or low.
+19..22	4		MSB first	Unsigned	Digital input 1. Counter value of the pulse counter.
+23..24	2		MSB first	Unsigned	Digital input 2. Counter value of the pulse counter.
+25..26	2		MSB first	Signed		Temperature. Multiply by 0.0625 to get the temperature in degrees Celcius. Special value: 0x8000 indicates that no temperature sensor was found.
+27..28	2		LSB first	Unsigned	Battery voltage. Multiply by 6.35 to get the voltage in millivolts.

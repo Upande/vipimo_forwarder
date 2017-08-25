@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "confidence": "^3.0.2",
+    "dotenv": "^4.0.0",
+    "fs-extra": "^4.0.1",
+    "lora-packet": "^0.6.0"
+  }
+}

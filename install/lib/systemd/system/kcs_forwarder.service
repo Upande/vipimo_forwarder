@@ -1,11 +1,11 @@
 [Unit]
-Description=Lorank activation
+Description=KCS activation
 
 [Service]
 User=nobody
 Group=nogroup
 WorkingDirectory=/
-ExecStart=~/kcs_forwarder/start
+ExecStart=~/root/kcs_forwarder/start.sh
 SyslogIdentifier=kcs_forwarder
 Restart=on-failure
 RestartSec=5

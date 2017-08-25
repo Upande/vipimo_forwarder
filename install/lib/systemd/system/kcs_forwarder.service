@@ -4,8 +4,8 @@ Description=KCS activation
 [Service]
 User=nobody
 Group=nogroup
-WorkingDirectory=/
-ExecStart=~/root/kcs_forwarder/start.sh
+WorkingDirectory=/root/kcs_forwarder/
+ExecStart=/root/kcs_forwarder/start.sh
 SyslogIdentifier=kcs_forwarder
 Restart=on-failure
 RestartSec=5

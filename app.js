@@ -2,8 +2,7 @@ const udp = require('dgram');
 const config = require('./config/config');
 const fse = require('fs-extra');
 const dotenv = require('dotenv');
-const parser = require('./src/parser.js')
-
+const kcs_forwarder = require('./src/kcs_forwarder.js')
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured
@@ -26,36 +25,17 @@ server.on('error',function(error){
   server.close();
 });
 
-// emits on new datagram msg
 server.on('message',function(msg_in,info){
   let msg = msg_in.toString();
 
-  parser.init(msg, info, function(err, result){
+  kcs_forwarder.init(msg, info, function(err, result){
     if(!err)
     {
-      parser.decode();
+      kcs_forwarder.decode();
     }
 
   });
   
-  // console.log('Data received from client : ' + msg_in.toString());
-  // console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
-
-
-  // //parse the data received...
-  // console.log("....................")
-  // console.log(msg)
-  // console.log(JSON.stringify(msg.toString()))
-
-// //sending msg
-// server.send(msg,info.port,'localhost',function(error){
-//   if(error){
-//     client.close();
-//   }else{
-//     console.log('Data sent !!!');
-//   }
-
-// });
 
 });
 
@@ -76,3 +56,13 @@ server.on('close',function(){
 });
 
 server.bind(process.env.PORT);
+
+//send a message to server from gateway after one hour
+// setInterval(function() { 
+//   console.log("setInterval: It's been one second!"); 
+// }, config.get('/intervals/gatewayalive'));
+//check for updates after every hour
+setInterval(function() { 
+
+  kcs_forwarder.updates();
+}, config.get('/intervals/checkupdates'));

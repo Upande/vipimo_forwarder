@@ -13,6 +13,10 @@ const config = {
 	"kcsserver":"",
 	"AppSKey":"",
 	"NwkSKey":"",
+	"intervals":{
+		"gatewayalive":2000,
+		"checkupdates":3000
+	}
 }
 
 

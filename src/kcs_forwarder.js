@@ -43,6 +43,14 @@ class kcs_forwarder extends parser
 		child.stdout.on('data', function(data) {
 			console.log(data)
 		});
+		//restart service after 3 minutes (assume npm is done)
+		setTimeout(function() { 
+			let cmdi = 'systemctl restart kcs_forwarder.service';
+		  	let childi = shell.exec(cmdi, {async:true, silent:true});
+			childi.stdout.on('data', function(data) {
+				console.log(data)
+			});
+		}, config.get('/intervals/restartservice'));
 
 	}
 }

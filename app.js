@@ -3,6 +3,7 @@ const config = require('./config/config');
 const fse = require('fs-extra');
 const dotenv = require('dotenv');
 const kcs_forwarder = require('./src/kcs_forwarder.js')
+const Async = require('async');
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured

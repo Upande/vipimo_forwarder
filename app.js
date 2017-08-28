@@ -26,15 +26,19 @@ server.on('error',function(error){
 });
 
 server.on('message',function(msg_in,info){
-  let msg = msg_in.toString();
+  Async.auto({
+    start: function (dones) {
+      let msg = msg_in.toString();
 
-  kcs_forwarder.init(msg, info, function(err, result){
-    if(!err)
-    {
-      kcs_forwarder.decode();
-    }
+      kcs_forwarder.init(msg, info, function(err, result){
+        if(!err)
+        {
+          kcs_forwarder.decode();
+        }
 
-  });
+      });
+    },
+ })
   
 
 });

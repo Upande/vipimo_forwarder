@@ -2,8 +2,8 @@
 Description=KCS activation
 
 [Service]
-User=nobody
-Group=nogroup
+User=root
+Group=root
 WorkingDirectory=/root/kcs_forwarder/
 ExecStart=/root/kcs_forwarder/start.sh
 SyslogIdentifier=kcs_forwarder

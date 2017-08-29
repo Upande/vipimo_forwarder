@@ -85,10 +85,13 @@ class kcs_forwarder extends parser
 					command = command.replace(/\+CLI([.]*)/ig, '$1');
 
 					let cmd = command;
+					console.log(cmd)
 					let child = shell.exec(cmd, {async:true, silent:true});
+					let calledback = false;
 					child.stdout.on('data', function(data) {
 						console.log(data)
-						callback_inner();
+						if(calledback === false) 
+							callback_inner();
 					});
 					
 					// callback_inner();
@@ -109,8 +112,14 @@ class kcs_forwarder extends parser
 
 	static gatewayupdate(callback)
 	{
-		console.log("willupdate gateway...")
-		callback();
+		let cmd = "git pull";
+		let child = shell.exec(cmd, {async:true, silent:true});
+		let calledback = false;
+		child.stdout.on('data', function(data) {
+			console.log(data)
+			if(calledback === false) 
+				callback();
+		});
 	}
 }
 

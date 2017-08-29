@@ -5,6 +5,8 @@ const gatewayconfig = require('../config/gatewayconfig');
 const request = require('request');
 const parser = require('./parser.js');
 const shell = require('shelljs');
+const Async = require('async');
+
 
 class kcs_forwarder extends parser
 {

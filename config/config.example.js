@@ -10,7 +10,10 @@ const criteria = {
 };
 
 const config = {
-	"kcsserver":"",
+	"kcsserver":{
+		0:"",
+		1:""
+	},
 	"AppSKey":"",
 	"NwkSKey":"",
 	"intervals":{

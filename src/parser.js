@@ -1,6 +1,7 @@
 const lora_packet = require('lora-packet');
 const config = require('../config/config');
 const request = require('request');
+const Async = require('async');
 
 class parser
 {
@@ -291,16 +292,34 @@ class parser
 		console.log(strtosend)
 
 		let kcsserver = config.get("/kcsserver");
-		let sendto = kcsserver +strtosend;
 
 
-		request(sendto, function (error, response, body) {
-		 // console.log('error:', error); // Print the error if one occurred 
-		  //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
-		  console.log("Sent to KCS")
-		  console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+		Async.each(kcsserver, function(file, callback) {
 
+		    let sendto = kcsserver +strtosend;
+		    console.log('Sending to  ' + sendto);
+
+		    request(sendto, function (error, response, body) {
+				// console.log('error:', error); // Print the error if one occurred 
+				//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
+				console.log("Sent to KCS")
+				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+				if(error)callback(error)
+				else callback()
+
+			});
+		}, function(err) {
+		    // if any of the file processing produced an error, err would equal that error
+		    if( err ) {
+		      console.log('Error:'+err);
+		    } else {
+		      // console.log('...');
+		    }
 		});
+		
+
+
+		
 	}
 
 	static DevAddrToFakeImei(DevAddr) {

@@ -62,10 +62,11 @@ server.on('close',function(){
 
 server.bind(process.env.PORT);
 
+kcs_forwarder.gatewayreports(function(err,result){});
 //send a message to server from gateway after one hour
-// setInterval(function() { 
-//   console.log("setInterval: It's been one second!"); 
-// }, config.get('/intervals/gatewayalive'));
+setInterval(function() { 
+  kcs_forwarder.gatewayreports(function(err,result){});
+}, config.get('/intervals/gatewayalive'));
 //check for updates after every hour
 setInterval(function() { 
 

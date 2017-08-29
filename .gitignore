@@ -2,3 +2,4 @@ node_modules/
 config/config.js
 .env
 src/try.js
+config/gatewayconfig.js

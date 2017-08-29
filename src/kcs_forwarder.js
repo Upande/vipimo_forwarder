@@ -1,6 +1,7 @@
 'use strict'
 const lora_packet = require('lora-packet');
 const config = require('../config/config');
+const gatewayconfig = require('../config/gatewayconfig');
 const request = require('request');
 const parser = require('./parser.js');
 const shell = require('shelljs');
@@ -15,7 +16,7 @@ class kcs_forwarder extends parser
 			if(updated === true)
 			{
 				console.log(updated)
-				self.updatemodules();
+				// self.updatemodules();
 			}
 		})
 		
@@ -35,23 +36,65 @@ class kcs_forwarder extends parser
 		});
 	}
 
-	static updatemodules()
-	{
-		console.log("will now try to update node modules...")
-		let cmd = 'npm install';
-		let child = shell.exec(cmd, {async:true, silent:true});
-		child.stdout.on('data', function(data) {
-			console.log(data)
-		});
-		//restart service after 3 minutes (assume npm is done)
-		setTimeout(function() { 
-			let cmdi = 'systemctl restart kcs_forwarder.service';
-		  	let childi = shell.exec(cmdi, {async:true, silent:true});
-			childi.stdout.on('data', function(data) {
-				console.log(data)
-			});
-		}, config.get('/intervals/restartservice'));
+	// static updatemodules()
+	// {
+	// 	console.log("will now try to update node modules...")
+	// 	let cmd = 'npm install';
+	// 	let child = shell.exec(cmd, {async:true, silent:true});
+	// 	child.stdout.on('data', function(data) {
+	// 		console.log(data)
+	// 	});
+	// 	//restart service after 3 minutes (assume npm is done)
+	// 	setTimeout(function() { 
+	// 		let cmdi = 'systemctl restart kcs_forwarder.service';
+	// 	  	let childi = shell.exec(cmdi, {async:true, silent:true});
+	// 		childi.stdout.on('data', function(data) {
+	// 			console.log(data)
+	// 		});
+	// 	}, config.get('/intervals/restartservice'));
 
+	// }
+
+	static gatewayreports(callback)
+	{
+
+		let self = this;
+		self.gatewayalive(function(err, result){})
+		self.gatewayupdate(function(err, result){})
+	}
+
+	static gatewayalive(callback)
+	{
+		let gatewayaliveendpoints = config.get("/gatewayendpoints/alive");
+		let gatewayIMEI = gatewayconfig.get("/IMEI");
+		Async.each(gatewayaliveendpoints, function(url, callback) {
+
+		    let sendto = url +gatewayIMEI+"|PVNZjzLw0vFM6g0000000Qc000000000000000000000";
+		    console.log('Sending to  ' + sendto);
+
+		    request(sendto, function (error, response, body) {
+				// console.log('error:', error); // Print the error if one occurred 
+				//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
+				console.log("Sent to KCS")
+				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+				if(error)callback(error)
+				else callback()
+
+			});
+		}, function(err) {
+		    // if any of the file processing produced an error, err would equal that error
+		    if( err ) {
+		      console.log(' '+err);
+		    } else {
+		      // console.log('...');
+		    }
+		});
+	}
+
+	static gatewayalive(callback)
+	{
+		console.log("willupdate gateway...")
+		callback();
 	}
 }
 

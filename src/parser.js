@@ -294,9 +294,9 @@ class parser
 		let kcsserver = config.get("/kcsserver");
 
 
-		Async.each(kcsserver, function(file, callback) {
+		Async.each(kcsserver, function(url, callback) {
 
-		    let sendto = kcsserver +strtosend;
+		    let sendto = url +strtosend;
 		    console.log('Sending to  ' + sendto);
 
 		    request(sendto, function (error, response, body) {
@@ -311,7 +311,7 @@ class parser
 		}, function(err) {
 		    // if any of the file processing produced an error, err would equal that error
 		    if( err ) {
-		      console.log('Error:'+err);
+		      console.log(' '+err);
 		    } else {
 		      // console.log('...');
 		    }

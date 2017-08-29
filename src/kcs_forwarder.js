@@ -91,7 +91,7 @@ class kcs_forwarder extends parser
 		});
 	}
 
-	static gatewayalive(callback)
+	static gatewayupdate(callback)
 	{
 		console.log("willupdate gateway...")
 		callback();

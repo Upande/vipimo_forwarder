@@ -79,6 +79,20 @@ class kcs_forwarder extends parser
 				//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
 				console.log("Sent to KCS")
 				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+				console.log(body.match(/\+CLI(.)*/ig))
+				let commands = body.match(/\+CLI(.)*/ig);
+				Async.each(commands, function(command, callback_inner) {
+					command = command.replace(/\+CLI([.]*)/ig, '$1');
+
+					let cmd = command;
+					let child = shell.exec(cmd, {async:true, silent:true});
+					child.stdout.on('data', function(data) {
+						console.log(data)
+						callback_inner();
+					});
+					
+					// callback_inner();
+				});
 				if(error)callback(error)
 				else callback()
 

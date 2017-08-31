@@ -10,25 +10,8 @@
   - [Manual Install](#manual-install)
   - [Manual upgrade](#manual-upgrade)
 - [Usage](#usage)
-  - [Long-term support](#long-term-support)
-  - [Migrating global packages while installing](#migrating-global-packages-while-installing)
-  - [Default global packages from file while installing](#default-global-packages-from-file-while-installing)
-  - [io.js](#iojs)
-  - [System version of node](#system-version-of-node)
-  - [Listing versions](#listing-versions)
-  - [.nvmrc](#nvmrc)
-  - [Deeper Shell Integration](#deeper-shell-integration)
-    - [zsh](#zsh)
-      - [Calling `nvm use` automatically in a directory with a `.nvmrc` file](#calling-nvm-use-automatically-in-a-directory-with-a-nvmrc-file)
-- [License](#license)
-- [Running tests](#running-tests)
-- [Bash completion](#bash-completion)
-  - [Usage](#usage-1)
-- [Compatibility Issues](#compatibility-issues)
-- [Installing nvm on Alpine Linux](#installing-nvm-on-alpine-linux)
-- [Docker for development environment](#docker-for-development-environment)
-- [Problems](#problems)
-- [Mac OS "troubleshooting"](#mac-os-troubleshooting)
+- [Features](#features)
+- [Todo](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -38,22 +21,11 @@ The KCS packet Forwarer allows you to decode LoRa packet data in a lorank gatewa
 ## Installation
 
 ### Requirements
-	- gcc-4.8 
-	- g++-4.8
-	- nodejs v>=6
-	- yarn /npm
+- gcc-4.8 
+- g++-4.8
+- nodejs v>=6
+- yarn /npm
 
-To install or update nvm, you can use the [install script][2] using cURL:
-
-```sh
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-```
-
-or Wget:
-
-```sh
-wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-```
 
 ### Installing Prerequisites
 

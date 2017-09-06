@@ -64,11 +64,12 @@ server.bind(process.env.PORT);
 
 kcs_forwarder.gatewayreports(function(err,result){});
 //send a message to server from gateway after one hour
+console.log("interval: "+config.get('/intervals/gatewayalive'));
+
 setInterval(function() { 
   kcs_forwarder.gatewayreports(function(err,result){});
 }, config.get('/intervals/gatewayalive'));
 //check for updates after every hour
-setInterval(function() { 
-
-  kcs_forwarder.updates();
-}, config.get('/intervals/checkupdates'));
+// setInterval(function() { 
+//   kcs_forwarder.updates();
+// }, config.get('/intervals/checkupdates'));

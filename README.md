@@ -16,7 +16,7 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## KCS Packet Fowarder
-The KCS packet Forwarer allows you to decode LoRa packet data in a lorank gateway and forward them to a KCS(or other) server over http so that you don't have to rely solely on TTN. You can have both TTN and the KCS server together. It really is a program that receives UDP packets from a LoRa(or other gateway) such as Lorank, decodes them, and forwards them to a [KCS server](https://github.com/upandeltd/vipimo_platform) using http. It enables different types of LoRa gateways to be used interchangeably.
+The KCS packet Fowarder allows you to decode LoRa packet data in a lorank gateway and forward them to a KCS(or other) server over http so that you don't have to rely solely on TTN. You can have both TTN and the KCS server together. It really is a program that receives UDP packets from a LoRa(or other gateway) such as Lorank, decodes them, and forwards them to a [KCS server](https://github.com/upandeltd/vipimo_platform) using http. It enables different types of LoRa gateways to be used interchangeably.
 
 ## Installation
 

@@ -71,7 +71,7 @@ class kcs_forwarder extends parser
 		let gatewayIMEI = gatewayconfig.get("/IMEI");
 		Async.each(gatewayaliveendpoints, function(url, callback) {
 
-		    let sendto = url +gatewayIMEI+"|PVNZjzLw0vFM6g0000000Qc000000000000000000000";
+		    let sendto = url +gatewayIMEI+"|PVNZjzLw0vFM6g0000000Qc000000000000000000000";	//check that we need to change this string... to include the right time in it...
 		    console.log('Sending to  ' + sendto);
 
 		    request(sendto, function (error, response, body) {

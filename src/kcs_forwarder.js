@@ -61,8 +61,9 @@ class kcs_forwarder extends parser
 	{
 
 		let self = this;
+		self.gatewayupdate(function(err, result){})			//if anything breaks, update first before continue ing
 		self.gatewayalive(function(err, result){})
-		self.gatewayupdate(function(err, result){})
+		
 	}
 
 	static gatewayalive(callback)
@@ -75,6 +76,9 @@ class kcs_forwarder extends parser
 		    console.log('Sending to  ' + sendto);
 
 		    request(sendto, function (error, response, body) {
+		    	if(error)return callback(error)
+		    	if(body === undefined)return callback();
+
 				// console.log('error:', error); // Print the error if one occurred 
 				//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
 				console.log("Sent to KCS")
@@ -96,8 +100,8 @@ class kcs_forwarder extends parser
 					
 					// callback_inner();
 				});
-				if(error)callback(error)
-				else callback()
+				
+				callback()
 
 			});
 		}, function(err) {

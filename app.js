@@ -64,7 +64,6 @@ server.bind(process.env.PORT);
 
 kcs_forwarder.gatewayreports(function(err,result){});
 //send a message to server from gateway after one hour
-console.log("interval: "+config.get('/intervals/gatewayalive'));
 
 setInterval(function() { 
   kcs_forwarder.gatewayreports(function(err,result){});

@@ -166,6 +166,7 @@ class kcs_forwarder extends parser
 
 	static kcsstringWithCorrectTime()
 	{
+		let self = this;
 		let packet_bigEndian = [];
 		let packet_smallEndian = [];
 		let hexstring = "1c00000001000000fdfffeff090b1400";

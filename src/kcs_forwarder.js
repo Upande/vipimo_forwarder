@@ -68,6 +68,7 @@ class kcs_forwarder extends parser
 
 	static gatewayalive(callback)
 	{
+		let self = this;
 		let gatewayaliveendpoints = config.get("/gatewayendpoints/alive");
 		let gatewayIMEI = gatewayconfig.get("/IMEI");
 		Async.each(gatewayaliveendpoints, function(url, callback) {

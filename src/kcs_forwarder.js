@@ -121,27 +121,34 @@ class kcs_forwarder extends parser
 
 	static gatewayupdate(callback)
 	{
+		let self = this;
+		self.updated = false;
 		let cmd = "git pull";
 		let child = shell.exec(cmd, {async:true, silent:true});
 		let calledback = false;
-		let self = this;
 		child.stdout.on('data', function(data) {
 			console.log("data:"+data)
 			let noupdates = data.match(/up-to-date/);
 			console.log("no updated....."+noupdates);
 
-			if(data == "Already up-to-date.")		//nothing to do...
-			{
-					callback();
-			}	
-			else	//if updated
-			{
-				//wait for sometime then restart service
-				console.log("Updated: will restart service")
-				self.restartservice(10000, function(){})
-				callback();
-			}
+			let noupdates = data.match(/up-to-date/);
+			if(noupdates !== null)self.updated = true;
 		});
+		self.diditupdate();
+		setTimeout(function(){
+			callback();
+		},30000)//be done after 30 seconds
+	}
+
+	static diditupdate()
+	{
+		let self = this;
+		let updated = false;
+		setTimeout(function(){
+			updated = self.updated;
+			if(updated === true)
+				self.restartservice(10000, function(){});
+		}, 30000)//wait 20 seconds to check for updates...
 	}
 
 	static restartservice(delay, callback)

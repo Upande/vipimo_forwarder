@@ -17,6 +17,7 @@ class kcs_forwarder extends parser
 			if(err)return;
 			if(updated === true)
 			{
+
 				console.log(updated)
 				// self.updatemodules();
 			}
@@ -126,6 +127,9 @@ class kcs_forwarder extends parser
 		let self = this;
 		child.stdout.on('data', function(data) {
 			console.log("data:"+data)
+			let noupdates = data.match(/up-to-date/);
+			console.log("no updated....."+noupdates);
+
 			if(data == "Already up-to-date.")		//nothing to do...
 			{
 					callback();

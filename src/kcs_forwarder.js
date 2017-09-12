@@ -123,6 +123,7 @@ class kcs_forwarder extends parser
 		let cmd = "git pull";
 		let child = shell.exec(cmd, {async:true, silent:true});
 		let calledback = false;
+		let self = this;
 		child.stdout.on('data', function(data) {
 			console.log(data)
 			if(data === "Already up-to-date.")		//nothing to do...

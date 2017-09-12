@@ -131,7 +131,6 @@ class kcs_forwarder extends parser
 			let noupdates = data.match(/up-to-date/);
 			console.log("no updated....."+noupdates);
 
-			let noupdates = data.match(/up-to-date/);
 			if(noupdates !== null)self.updated = true;
 		});
 		self.diditupdate();

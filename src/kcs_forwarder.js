@@ -125,7 +125,7 @@ class kcs_forwarder extends parser
 		let calledback = false;
 		let self = this;
 		child.stdout.on('data', function(data) {
-			console.log(data)
+			console.log("data:"+data)
 			if(data === "Already up-to-date.")		//nothing to do...
 			{
 					callback();

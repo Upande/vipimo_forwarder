@@ -125,9 +125,30 @@ class kcs_forwarder extends parser
 		let calledback = false;
 		child.stdout.on('data', function(data) {
 			console.log(data)
-			if(calledback === false) 
+			if(data === "Already up-to-date.")		//nothing to do...
+			{
+					callback();
+			}	
+			else	//if updated
+			{
+				//wait for sometime then restart service
+				self.restartservice(10000, function(){})
 				callback();
+			}
 		});
+	}
+
+	static restartservice(delay, callback)
+	{
+		setTimeout(function(){
+
+			let cmd = "systemctl restart kcs_forwarder.service";
+			let child = shell.exec(cmd, {async:true, silent:true});
+			child.stdout.on('data', function(data) {
+				console.log(data)
+				callback();
+			});
+		}, delay)
 	}
 
 	static roughSizeOfObject( object ) {

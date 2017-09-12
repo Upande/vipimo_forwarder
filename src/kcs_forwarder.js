@@ -133,6 +133,7 @@ class kcs_forwarder extends parser
 			else	//if updated
 			{
 				//wait for sometime then restart service
+				console.log("Updated: will restart service")
 				self.restartservice(10000, function(){})
 				callback();
 			}

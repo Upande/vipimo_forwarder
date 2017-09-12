@@ -122,7 +122,7 @@ class kcs_forwarder extends parser
 	static gatewayupdate(callback)
 	{
 		let self = this;
-		self.updated = false;
+		self.updated = true;
 		let cmd = "git pull";
 		let child = shell.exec(cmd, {async:true, silent:true});
 		let calledback = false;
@@ -131,7 +131,7 @@ class kcs_forwarder extends parser
 			let noupdates = data.match(/up-to-date/);
 			console.log("no updated....."+noupdates);
 
-			if(noupdates !== null)self.updated = true;
+			if(noupdates !== null)self.updated = false;
 		});
 		self.diditupdate();
 		setTimeout(function(){

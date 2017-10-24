@@ -223,6 +223,7 @@ class kcs_forwarder extends parser
 		analog1 = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);
 		analog2 = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);
 		vbat = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);
+		//console.log("................bat"+vbat)
 		temperature = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);     //-32768
 		vbat /= 1000;
 

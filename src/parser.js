@@ -135,6 +135,7 @@ class parser
 		analog2 = (payload[16]<<8) + payload[17];
 		temperature = (payload[25]<<8) + payload[26];
 		vbat = (payload[28]<<8) + payload[27];
+		vbat *= 0.006406;
 
 		// analog1 = 4;
 		// temperature = 3;
@@ -147,6 +148,7 @@ class parser
 		console.log("digital2:"+digital2)
 		console.log("analog1:"+analog1)
 		console.log("analog2:"+analog2)
+		vbat *= 1000;
 		console.log("vbat(mV):"+vbat)
 		vbat /= 1000;
 		console.log("vbat(V):"+vbat)

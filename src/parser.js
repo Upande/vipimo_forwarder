@@ -100,7 +100,7 @@ class parser
 		let self = this;
 		let hexstring = self.hexstring
 		let payload = self.payload;
-		if(payload[0] !== 0x24)callback("invalid payload received");
+		if(payload[0] !== 0x24)return callback("invalid payload received");
 
 		let packet_bigEndian = [];
 		let packet_smallEndian = [];

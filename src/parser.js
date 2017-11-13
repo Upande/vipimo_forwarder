@@ -15,21 +15,24 @@ class parser
 	}
 	static init(msg, info, callback)
 	{
+		let msg2 = msg;
 		let self = this;
 		self.clear_vars();
   	 	console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
-		console.log('Data received from client : ' + msg);
-		// let is_data = msg.match(/"data":"(.)*"/i)
+		console.log(msg);
 		let is_data;
 		try
 		{
-			is_data = msg.match(/"data":"[^\"]*"/ig)[0].replace(/"data":"([^\"]*)"/, '$1');
+			msg = JSON.parse(msg)
+			is_data = msg.rxpk[0].data
+			if(is_data === undefined) throw new Error("..")
+//			is_data = msg.match(/"data":"[^\"]*"/ig)[0].replace(/"data":"([^\"]*)"/, '$1');
 		}catch(error)
 		{
-			// console.log(error)
+			console.log(error)
 			return callback(error);
 		}
-		
+
 		self.msg = is_data;
 		callback()
 

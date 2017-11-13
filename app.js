@@ -4,6 +4,7 @@ const fse = require('fs-extra');
 const dotenv = require('dotenv');
 const kcs_forwarder = require('./src/kcs_forwarder.js')
 const Async = require('async');
+const { StringDecoder } = require('string_decoder');
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured
@@ -29,9 +30,11 @@ server.on('error',function(error){
 server.on('message',function(msg_in,info){
   Async.auto({
     start: function (dones) {
-      let msg = msg_in.toString();
-
-      kcs_forwarder.init(msg, info, function(err, result){
+	let decoder = new StringDecoder('utf8');
+	let msg2 = msg_in.slice(12, msg_in.length)
+	msg2 = Buffer.from(msg2);
+	msg2 = decoder.write(msg2);
+      kcs_forwarder.init(msg2, info, function(err, result){
         if(!err)
         {
           kcs_forwarder.decode();

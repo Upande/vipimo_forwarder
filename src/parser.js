@@ -113,12 +113,13 @@ class parser
 
 		self.kcs_encode(function(err, result){
 			if(err)return;
-			kcs_forwarder.sendsignalmsg();
+			self.sendsignalmsg();
 		})
 	}
 
 	static getdevAddr(msg)
 	{
+		let self = this;
 		let devArr;
 		try
 		{

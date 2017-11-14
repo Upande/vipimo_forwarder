@@ -48,8 +48,9 @@ class parser
 		let kcsserver = config.get("/kcsserver");
 		//let gatewayIMEI = gatewayconfig.get("/IMEI");
 		//console.log(self.signalmsg)
-		self.signalmsg.rxpk["gateway"] = gatewayconfig.get("/IMEI");
-		self.signalmsg.rxpk["devaddr"] = devArr//self.devArr;
+		self.signalmsg.rxpk[0]["gateway"] = gatewayconfig.get("/IMEI");
+		self.signalmsg.rxpk[0]["devaddr"] = devArr//self.devArr;
+		//console.log(self.signalmsg)
 		let strtosend = new Buffer(JSON.stringify(self.signalmsg)).toString('base64')
 		
 		Async.each(kcsserver, function(url, callback) {
@@ -120,11 +121,9 @@ class parser
 	static getdevAddr(callback)
 	{
 		let self = this;
-		let self = this;
-
 		// console.log(self.msg)
 		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
-		let msg = packet.toString;
+		let msg = packet.toString();
 		// debug: prints out contents
 		// - contents depend on packet type
 		// - contents are named based on LoRa spec
@@ -133,6 +132,7 @@ class parser
 		let devArr;
 		try
 		{
+			//console.log(self.msg)
 			devArr = msg.match(/DevAddr = [A-Z0-9a-z]*/i)[0].replace(/DevAddr = ([.]*)/, '$1')
 
 		}catch(error)

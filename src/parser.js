@@ -45,7 +45,10 @@ class parser
 	{
 		let self = this;
 		let kcsserver = config.get("/kcsserver");
+		//let gatewayIMEI = gatewayconfig.get("/IMEI");
 		//console.log(self.signalmsg)
+		self.signalmsg.rxpk["gateway"] = gatewayconfig.get("/IMEI");
+		self.signalmsg.rxpk["devaddr"] = self.devArr;
 		let strtosend = new Buffer(JSON.stringify(self.signalmsg)).toString('base64')
 		
 		Async.each(kcsserver, function(url, callback) {
@@ -110,7 +113,7 @@ class parser
 
 		self.kcs_encode(function(err, result){
 			if(err)return;
-
+			kcs_forwarder.sendsignalmsg();
 		})
 	}
 
@@ -126,6 +129,7 @@ class parser
 		 	console.log(error)
 		 	return false;
 		}
+		self.devArr = devArr
 		return devArr;
 	}
 

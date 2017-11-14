@@ -38,6 +38,7 @@ server.on('message',function(msg_in,info){
         if(!err)
         {
           kcs_forwarder.decode();
+          kcs_forwarder.signalmsg();
         }
 
       });

@@ -31,7 +31,7 @@ class kcs_forwarder extends parser
 		let cmd = 'git pull';
 		let child = shell.exec(cmd, {async:true, silent:true});
 		child.stdout.on('data', function(data) {
-			console.log(data)
+			// console.log(data)
 			let noupdates = data.match(/up-to-date/);
 			console.log(noupdates)
 			if(noupdates)return callback(null, false);
@@ -39,24 +39,6 @@ class kcs_forwarder extends parser
 		});
 	}
 
-	// static updatemodules()
-	// {
-	// 	console.log("will now try to update node modules...")
-	// 	let cmd = 'npm install';
-	// 	let child = shell.exec(cmd, {async:true, silent:true});
-	// 	child.stdout.on('data', function(data) {
-	// 		console.log(data)
-	// 	});
-	// 	//restart service after 3 minutes (assume npm is done)
-	// 	setTimeout(function() { 
-	// 		let cmdi = 'systemctl restart kcs_forwarder.service';
-	// 	  	let childi = shell.exec(cmdi, {async:true, silent:true});
-	// 		childi.stdout.on('data', function(data) {
-	// 			console.log(data)
-	// 		});
-	// 	}, config.get('/intervals/restartservice'));
-
-	// }
 
 	static gatewayreports(callback)
 	{

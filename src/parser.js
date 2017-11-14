@@ -2,6 +2,8 @@ const lora_packet = require('lora-packet');
 const config = require('../config/config');
 const request = require('request');
 const Async = require('async');
+const Encoder = require('node-html-encoder').Encoder;
+const encoder = new Encoder('numerical');
 
 class parser
 {
@@ -29,12 +31,41 @@ class parser
 //			is_data = msg.match(/"data":"[^\"]*"/ig)[0].replace(/"data":"([^\"]*)"/, '$1');
 		}catch(error)
 		{
-			console.log(error)
+			// console.log(error)
 			return callback(error);
 		}
 
 		self.msg = is_data;
+		self.signalmsg = msg;
 		callback()
+
+	}
+
+	static signalmsg()
+	{
+		let self = this;
+		let kcsserver = config.get("/kcsserver");
+		let strtosend = encoder.htmlEncode(self.signalmsg)
+
+		Async.each(kcsserver, function(url, callback) {
+			url = url.replace("upload.php","uploadsignal.php");
+		    let sendto = url +strtosend;
+		    console.log('Sending to  ' + sendto);
+
+		    request(sendto, function (error, response, body) {
+				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+				if(error)callback(error)
+				else callback()
+
+			});
+		}, function(err) {
+		    // if any of the file processing produced an error, err would equal that error
+		    if( err ) {
+		      console.log(' '+err);
+		    } else {
+		      // console.log('...');
+		    }
+		});
 
 	}
 
@@ -42,7 +73,7 @@ class parser
 	{
 		let self = this;
 
-		console.log(self.msg)
+		// console.log(self.msg)
 		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
 
 		// debug: prints out contents
@@ -52,18 +83,18 @@ class parser
 		let devArr = self.getdevAddr(packet.toString())
 
 		// e.g. retrieve payload elements
-		console.log("packet MIC=" + packet.getBuffers().MIC.toString('hex'));
-		console.log("FRMPayload=" + packet.getBuffers().FRMPayload.toString('hex'));
+		// console.log("packet MIC=" + packet.getBuffers().MIC.toString('hex'));
+		// console.log("FRMPayload=" + packet.getBuffers().FRMPayload.toString('hex'));
 
 		// check MIC
 		var NwkSKey = new Buffer(config.get("/NwkSKey"), 'hex');
-		console.log("MIC check=" + (lora_packet.verifyMIC(packet, NwkSKey) ? "OK" : "fail"));
+		// console.log("MIC check=" + (lora_packet.verifyMIC(packet, NwkSKey) ? "OK" : "fail"));
 
 		// calculate MIC based on contents
-		console.log("calculated MIC=" + lora_packet.calculateMIC(packet, NwkSKey).toString('hex'));
+		// console.log("calculated MIC=" + lora_packet.calculateMIC(packet, NwkSKey).toString('hex'));
 
 		// decrypt payload
-		var AppSKey = new Buffer(config.get("/AppSKey"), 'hex');
+		let AppSKey = new Buffer(config.get("/AppSKey"), 'hex');
 		// console.log("Decrypted='" + lora_packet.decrypt(packet, AppSKey, NwkSKey).toString() + "'");
 		let payload = lora_packet.decrypt(packet, AppSKey, NwkSKey);
 		let hexstring = payload.toString('hex');
@@ -71,10 +102,10 @@ class parser
 		self.imei = imei;
 		console.log(devArr+":"+imei)
 		console.log(hexstring)
-		console.log(payload)
+		// console.log(payload)
 		self.payload = payload;
 		self.hexstring = hexstring;
-		console.log("-----------------")
+		// console.log("-----------------")
 
 		self.kcs_encode(function(err, result){
 			if(err)return;
@@ -260,7 +291,6 @@ class parser
 		    {
 		      let bit =   (byte<<(8*7+bitindex))>>(8*7+bitindex)>>(7-bitindex);
 		      if(bit === -1)bit = 1;//////////////////////////////////////////////////////// is the sign bit remaining?
-		     // console.log("is bit:"+bit)
 		      bytet0push += bit<<(5-tmpi)
 		      tmpi++;
 		      if(tmpi == 6)
@@ -273,19 +303,12 @@ class parser
 		    }
 		 }
 
-		 // console.log(packetstosend)
 		packetind = self.roughSizeOfObject(packetstosend)/singleitemsize
-		// console.log("packetind: "+packetind)
 		let packetstosendbigEndian = []
 		for(tmp= 0; tmp<packetind;tmp++)packetstosendbigEndian.push(packetstosend.pop())
 		//packetind = roughSizeOfObject(packet33charsinverted)/singleitemsize-1
 		console.log("packetind: "+packetind)
 		let c = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
-		// let httpdata = '865733024636128|Pg91pip_CptM6g5g00gw47Pd0A5BkS0qj70b00000c1B'
-		// console.log("length of c")
-		// console.log(c.length)
-
-		// console.log(packetstosendbigEndian)
 
 		let strtosend = '';
 		for(tmp= 0; tmp<packetind;tmp++)
@@ -305,9 +328,7 @@ class parser
 		    console.log('Sending to  ' + sendto);
 
 		    request(sendto, function (error, response, body) {
-				// console.log('error:', error); // Print the error if one occurred 
-				//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
-				console.log("Sent to KCS")
+				// console.log("Sent to KCS")
 				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
 				if(error)callback(error)
 				else callback()

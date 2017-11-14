@@ -41,7 +41,7 @@ class parser
 
 	}
 
-	static signalmsg()
+	static sendsignalmsg()
 	{
 		let self = this;
 		let kcsserver = config.get("/kcsserver");

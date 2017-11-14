@@ -2,8 +2,8 @@ const lora_packet = require('lora-packet');
 const config = require('../config/config');
 const request = require('request');
 const Async = require('async');
-const Encoder = require('node-html-encoder').Encoder;
-const encoder = new Encoder('numerical');
+//const Encoder = require('node-html-encoder').Encoder;
+//const encoder = new Encoder('entity');
 
 class parser
 {
@@ -45,8 +45,9 @@ class parser
 	{
 		let self = this;
 		let kcsserver = config.get("/kcsserver");
-		let strtosend = encoder.htmlEncode(self.signalmsg)
-
+		//console.log(self.signalmsg)
+		let strtosend = new Buffer(JSON.stringify(self.signalmsg)).toString('base64')
+		
 		Async.each(kcsserver, function(url, callback) {
 			url = url.replace("upload.php","uploadsignal.php");
 		    let sendto = url +strtosend;

@@ -417,6 +417,10 @@ node-aes-cmac@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/node-aes-cmac/-/node-aes-cmac-0.1.1.tgz#9bfff86b2f63e3949e2828bd85f5b6825b702844"
 
+node-html-encoder@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/node-html-encoder/-/node-html-encoder-0.0.2.tgz#8973618d727da5526a830b47d07c0d803e0a15c6"
+
 normalize-package-data@^2.3.2:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/normalize-package-data/-/normalize-package-data-2.4.0.tgz#12f95a307d58352075a04907b84ac8be98ac012f"

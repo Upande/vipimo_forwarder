@@ -2,6 +2,7 @@ const lora_packet = require('lora-packet');
 const config = require('../config/config');
 const request = require('request');
 const Async = require('async');
+const gatewayconfig = require('../config/gatewayconfig');
 //const Encoder = require('node-html-encoder').Encoder;
 //const encoder = new Encoder('entity');
 
@@ -41,14 +42,14 @@ class parser
 
 	}
 
-	static sendsignalmsg()
+	static sendsignalmsg(devArr)
 	{
 		let self = this;
 		let kcsserver = config.get("/kcsserver");
 		//let gatewayIMEI = gatewayconfig.get("/IMEI");
 		//console.log(self.signalmsg)
 		self.signalmsg.rxpk["gateway"] = gatewayconfig.get("/IMEI");
-		self.signalmsg.rxpk["devaddr"] = self.devArr;
+		self.signalmsg.rxpk["devaddr"] = devArr//self.devArr;
 		let strtosend = new Buffer(JSON.stringify(self.signalmsg)).toString('base64')
 		
 		Async.each(kcsserver, function(url, callback) {
@@ -84,8 +85,8 @@ class parser
 		// - contents depend on packet type
 		// - contents are named based on LoRa spec
 		// console.log("packet.toString()=\n" + packet);
-		let devArr = self.getdevAddr(packet.toString())
-
+		// let devArr = self.getdevAddr(packet.toString())
+		let devArr = self.devArr
 		// e.g. retrieve payload elements
 		// console.log("packet MIC=" + packet.getBuffers().MIC.toString('hex'));
 		// console.log("FRMPayload=" + packet.getBuffers().FRMPayload.toString('hex'));
@@ -113,13 +114,22 @@ class parser
 
 		self.kcs_encode(function(err, result){
 			if(err)return;
-			self.sendsignalmsg();
 		})
 	}
 
-	static getdevAddr(msg)
+	static getdevAddr(callback)
 	{
 		let self = this;
+		let self = this;
+
+		// console.log(self.msg)
+		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
+		let msg = packet.toString;
+		// debug: prints out contents
+		// - contents depend on packet type
+		// - contents are named based on LoRa spec
+		// console.log("packet.toString()=\n" + packet);
+		// let devArr = self.getdevAddr(packet.toString())
 		let devArr;
 		try
 		{
@@ -131,7 +141,7 @@ class parser
 		 	return false;
 		}
 		self.devArr = devArr
-		return devArr;
+		return callback(null, devArr);
 	}
 
 

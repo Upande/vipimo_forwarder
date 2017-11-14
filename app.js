@@ -37,7 +37,11 @@ server.on('message',function(msg_in,info){
       kcs_forwarder.init(msg2, info, function(err, result){
         if(!err)
         {
-          kcs_forwarder.decode();
+          kcs_forwarder.getdevAddr(function(err, devAddr){
+            kcs_forwarder.decode();
+            kcs_forwarder.sendsignalmsg();
+          })
+          
         }
 
       });

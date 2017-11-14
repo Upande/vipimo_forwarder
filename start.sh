@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+tail -n 1000 /var/log/syslog > tmp.txt 
+curl --upload-file tmp.txt http://kcs.vipimo.co.ke/traceme/api/uploads/index.php --insecure
+
 cd /root/kcs_forwarder/
 # #check for updates when starting
 yarn add  node-html-encoder

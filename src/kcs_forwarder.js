@@ -31,16 +31,19 @@ class kcs_forwarder extends parser
 
 	/*static*/ checkforupdates(callback)
 	{
-		console.log("checking for updates...")
-		let cmd = 'git pull';
-		let child = shell.exec(cmd, {async:true, silent:true});
-		child.stdout.on('data', function(data) {
-			// console.log(data)
-			let noupdates = data.match(/up-to-date/);
-			console.log(noupdates)
-			if(noupdates)return callback(null, false);
-			return callback(null, true);	//updates found and updated
-		});
+		// console.log("checking for updates...")
+		// let cmd = 'git pull';
+		//leave out this for now. Just restart and let bash script handle it
+		process.exit(20)
+		// let cmd = 'g';
+		// let child = shell.exec(cmd, {async:true, silent:true});
+		// child.stdout.on('data', function(data) {
+		// 	// console.log(data)
+		// 	let noupdates = data.match(/up-to-date/);
+		// 	console.log(noupdates)
+		// 	if(noupdates)return callback(null, false);
+		// 	return callback(null, true);	//updates found and updated
+		// });
 	}
 
 

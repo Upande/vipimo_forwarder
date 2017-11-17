@@ -119,8 +119,17 @@ tail -f /var/log/syslog |grep kcs_forwarder
 - [x] Automatic updates
 - [x] Remote running of commands
 - [x] Gateway alive packets
+- [x] Gateway uptime and script uptime
 
 ## Todo
 - [x] Forward to KCS
 - [ ] Add more data formats (of received payload)
 - [ ] Allow different decoding credentials(Netkey & AppKey) for different devices
+- [ ] Reverse tunneling
+- [ ] Analyzing logs
+- [ ] Restarting if no internet, depending on device type
+- [ ] Saving device logs if no internet
+- [ ] Signal strength
+- [ ] Signal strength and battery together
+- [1] Count the number of nodes
+- [ ] Separate gateway alive from gateway reports

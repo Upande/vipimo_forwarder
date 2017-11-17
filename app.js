@@ -80,4 +80,9 @@ setTimeout(function(){
   setInterval(function() { 
     kcs_forwarder.gatewayreports(function(err,result){});
   }, config.get('/intervals/gatewayalive'));
-}, 10000)
+
+  setInterval(function() { 
+    kcs_forwarder.gatewayupdate(function(err,result){});
+  }, config.get('/intervals/checkupdates'));
+  
+}, 1000)

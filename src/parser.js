@@ -5,10 +5,15 @@ const Async = require('async');
 const gatewayconfig = require('../config/gatewayconfig');
 //const Encoder = require('node-html-encoder').Encoder;
 //const encoder = new Encoder('entity');
+let nodeMon = require("./nodeMonitor")
 
 class parser
 {
-	static clear_vars()
+	constructor()
+	{
+		this.nodeMon = nodeMon
+	}
+	/*static*/ clear_vars()
 	{
 		let self = this;
 		self.msg = null;
@@ -16,7 +21,7 @@ class parser
 		self.hexstring = null;
 		self.imei = null;
 	}
-	static init(msg, info, callback)
+	/*static*/ init(msg, info, callback)
 	{
 		let msg2 = msg;
 		let self = this;
@@ -42,7 +47,7 @@ class parser
 
 	}
 
-	static sendsignalmsg(devArr)
+	/*static*/ sendsignalmsg(devArr)
 	{
 		let self = this;
 		let kcsserver = config.get("/kcsserver");
@@ -75,7 +80,7 @@ class parser
 
 	}
 
-	static decode()
+	/*static*/ decode()
 	{
 		let self = this;
 
@@ -118,7 +123,7 @@ class parser
 		})
 	}
 
-	static getdevAddr(callback)
+	/*static*/ getdevAddr(callback)
 	{
 		let self = this;
 		// console.log(self.msg)
@@ -141,11 +146,12 @@ class parser
 		 	return false;
 		}
 		self.devArr = devArr
+		nodeMon.addNode(devArr)
 		return callback(null, devArr);
 	}
 
 
-	static kcs_encode(callback)
+	/*static*/ kcs_encode(callback)
 	{
 		let self = this;
 		let hexstring = self.hexstring
@@ -364,7 +370,7 @@ class parser
 		
 	}
 
-	static DevAddrToFakeImei(DevAddr) {
+	/*static*/ DevAddrToFakeImei(DevAddr) {
 		var imei = "999", bits, digit;
 		if (!DevAddr.match(/^[0-9a-f]{8}$/i))
 			return ""; //Not 8 hexadecimal characters
@@ -384,7 +390,7 @@ class parser
 		return imei + ((10 - (c % 10)) % 10).toString(10);
 	}
 
-	static roughSizeOfObject( object ) {
+	/*static*/ roughSizeOfObject( object ) {
 
 	    var objectList = [];
 	    var stack = [ object ];

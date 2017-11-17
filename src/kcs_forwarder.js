@@ -10,7 +10,11 @@ const Async = require('async');
 
 class kcs_forwarder extends parser
 {
-	static updates()
+	constructor()
+	{
+		super()
+	}
+	/*static*/ updates()
 	{
 		let self= this;
 		self.checkforupdates(function(err, updated){
@@ -25,7 +29,7 @@ class kcs_forwarder extends parser
 		
 	}
 
-	static checkforupdates(callback)
+	/*static*/ checkforupdates(callback)
 	{
 		console.log("checking for updates...")
 		let cmd = 'git pull';
@@ -40,16 +44,38 @@ class kcs_forwarder extends parser
 	}
 
 
-	static gatewayreports(callback)
+	/*static*/ gatewayreports(callback)
 	{
 
 		let self = this;
-		self.gatewayupdate(function(err, result){})			//if anything breaks, update first before continue ing
+		//self.gatewayupdate(function(err, result){})			//if anything breaks, update first before continue ing
 		self.gatewayalive(function(err, result){})
 		
 	}
 
-	static gatewayalive(callback)
+
+	/*static*/ gatewayuptime(callback)
+	{
+		try
+		{
+			let cmd = "cat /proc/uptime"
+			let child = shell.exec(cmd, {async:true, silent:true});
+			let calledback = false;
+			let minutes = 0;
+			let hours = 0;
+			child.stdout.on('data', function(data) {
+				let tmp = data.split(" ")[0]
+				minutes = parseInt(tmp/60)
+				callback(null, minutes)
+			});
+		}catch(err)
+		{
+			callback(err, 0)
+		}
+		
+	}
+
+	/*static*/ gatewayalive(callback)
 	{
 		let self = this;
 		let gatewayaliveendpoints = config.get("/gatewayendpoints/alive");
@@ -58,39 +84,46 @@ class kcs_forwarder extends parser
 			//require this data string...
 
 
-			let strUp = self.kcsstringWithCorrectTime()
-		    let sendto = url +gatewayIMEI+"|"+strUp;//PVNZjzLw0vFM6g0000000Qc000000000000000000000";	
-		    console.log('Sending to  ' + sendto);
+			self.gatewayuptime(function(err, gatewayUptime){
+				let scriptUptime = Math.floor(process.uptime()/60)
+				let nodeCount = self.nodeMon.countNodes()
+				let strUp = self.kcsstringWithCorrectTime(scriptUptime, gatewayUptime,nodeCount)
+			    let sendto = url +gatewayIMEI+"|"+strUp;//PVNZjzLw0vFM6g0000000Qc000000000000000000000";	
+			    console.log('Sending to  ' + sendto);
 
-		    request(sendto, function (error, response, body) {
-		    	if(error)return callback(error)
-		    	if(body === undefined)return callback();
+			    
+			    request(sendto, function (error, response, body) {
+			    	if(error)return callback(error)
+			    	if(body === undefined)return callback();
 
-				// console.log('error:', error); // Print the error if one occurred 
-				//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
-				console.log("Sent to KCS")
-				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
-				console.log(body.match(/\+CLI(.)*/ig))
-				let commands = body.match(/\+CLI(.)*/ig);
-				Async.each(commands, function(command, callback_inner) {
-					command = command.replace(/\+CLI([.]*)/ig, '$1');
+					// console.log('error:', error); // Print the error if one occurred 
+					//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
+					console.log("Sent to KCS")
+					console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+					console.log(body.match(/\+CLI(.)*/ig))
+					let commands = body.match(/\+CLI(.)*/ig);
+					Async.each(commands, function(command, callback_inner) {
+						command = command.replace(/\+CLI([.]*)/ig, '$1');
 
-					let cmd = command;
-					console.log(cmd)
-					let child = shell.exec(cmd, {async:true, silent:true});
-					let calledback = false;
-					child.stdout.on('data', function(data) {
-						console.log(data)
-						if(calledback === false) 
-							callback_inner();
+						let cmd = command;
+						console.log(cmd)
+						let child = shell.exec(cmd, {async:true, silent:true});
+						let calledback = false;
+						child.stdout.on('data', function(data) {
+							console.log(data)
+							if(calledback === false) 
+								callback_inner();
+						});
+						
+						// callback_inner();
 					});
 					
-					// callback_inner();
+					callback()
+
 				});
-				
-				callback()
 
 			});
+			
 		}, function(err) {
 		    // if any of the file processing produced an error, err would equal that error
 		    if( err ) {
@@ -101,7 +134,7 @@ class kcs_forwarder extends parser
 		});
 	}
 
-	static gatewayupdate(callback)
+	/*static*/ gatewayupdate(callback)
 	{
 		let self = this;
 		self.updated = true;
@@ -121,7 +154,7 @@ class kcs_forwarder extends parser
 		},30000)//be done after 30 seconds
 	}
 
-	static diditupdate()
+	/*static*/ diditupdate()
 	{
 		let self = this;
 		let updated = false;
@@ -132,7 +165,7 @@ class kcs_forwarder extends parser
 		}, 30000)//wait 20 seconds to check for updates...
 	}
 
-	static restartservice(delay, callback)
+	/*static*/ restartservice(delay, callback)
 	{
 		setTimeout(function(){
 
@@ -145,7 +178,7 @@ class kcs_forwarder extends parser
 		}, delay)
 	}
 
-	static roughSizeOfObject( object ) {
+	/*static*/ roughSizeOfObject( object ) {
 
 	    let objectList = [];
 	    let stack = [ object ];
@@ -180,7 +213,7 @@ class kcs_forwarder extends parser
 	    return bytes;
 	}
 
-	static kcsstringWithCorrectTime()
+	/*static*/ kcsstringWithCorrectTime(scriptUptime, gatewayUptime, nodeCount)
 	{
 		let self = this;
 		let packet_bigEndian = [];
@@ -209,6 +242,8 @@ class kcs_forwarder extends parser
 		temperature = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);     //-32768
 		vbat /= 1000;
 
+
+
 		let time = Math.floor(Date.now() / 1000)//timestamp in seconds
 		let sizeoftime = self.roughSizeOfObject(time)
 		let sizeofdigital1 = self.roughSizeOfObject(digital1)
@@ -219,6 +254,13 @@ class kcs_forwarder extends parser
 		let sizeoftemperature = self.roughSizeOfObject(temperature)
 		let packet33chars = []
 
+
+		////
+
+			digital1 = scriptUptime;
+			digital2 = gatewayUptime;
+			vbat = nodeCount/10+1;
+		///
 
 		sizeoftime *= 8//in bits
 		time = 100*(time-946684800.0)/16
@@ -319,4 +361,4 @@ class kcs_forwarder extends parser
 }
 
 
-module.exports = kcs_forwarder
+module.exports = new kcs_forwarder

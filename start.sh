@@ -7,10 +7,18 @@ fixgiterror()
 	git stash
 }
 
+fixgiterroragain()
+{
+	wget https://github.com/upandeltd/kcs_forwarder/blob/dev/resources/dotgit.tar.gz
+	rm -r .git
+	tar -xzvf dotgit.tar.gz
+}
+
+
 gitpull()
 {
 	#
-	if [ $giterror = 1 ];then
+	if [ $giterror = 2 ];then
 		return 1
 	fi
 	failedtopull=0
@@ -31,6 +39,12 @@ gitpull()
 		giterror=1
 		fixgiterror
 		gitpull
+	else
+		if [ $failedtopull = 1 ] && [ $giterror = 1 ];then
+		giterror=2
+		fixgiterroragain
+		gitpull
+		fi
 	fi
 }
 

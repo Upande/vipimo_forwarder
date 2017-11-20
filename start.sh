@@ -4,7 +4,6 @@ giterror=0
 
 fixgiterror()
 {
-	
 	git stash
 }
 

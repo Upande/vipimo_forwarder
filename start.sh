@@ -9,9 +9,18 @@ fixgiterror()
 
 fixgiterroragain()
 {
-	wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz
-	rm -rf .git
-	tar -xzvf dotgit.tar.gz
+	{
+		wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz
+		rm -rf .git
+		tar -xzvf dotgit.tar.gz
+		rm -f dotgit.tar.gz
+	}||{
+
+		cp ./resources/dotgit.tar.gz
+		rm -rf .git
+		tar -xzvf dotgit.tar.gz
+		rm -f dotgit.tar.gz
+	}
 }
 
 
@@ -84,10 +93,16 @@ main()
 	set +a # stop exporting
 
 	#update first, just in case things are broken and it fails to start completely
-	wget http://196.207.140.183:3000/traceme/resources/config.conf -O config/config.js
+	# {
+	#	wget http://196.207.140.183:3000/traceme/resources/config.conf -O config/config.js
+	#}||
+	# {
+	#	wget http://196.207.140.183:3000/traceme/resources/config.conf -O config/config.js
+	#}
+	
 	gitpull
 	setdate
-	updatemodules
+	#updatemodules
 	node app.js
 }
 

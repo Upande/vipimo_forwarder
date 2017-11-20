@@ -9,8 +9,8 @@ fixgiterror()
 
 fixgiterroragain()
 {
-	wget https://github.com/upandeltd/kcs_forwarder/blob/dev/resources/dotgit.tar.gz
-	rm -r .git
+	wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz
+	rm -rf .git
 	tar -xzvf dotgit.tar.gz
 }
 
@@ -22,19 +22,23 @@ gitpull()
 		return 1
 	fi
 	failedtopull=0
-	if [ $ENVIRONMENT = 'production' ]; then
-		{ # try
-	    	git pull origin master
-		} || { # catch
-			failedtopull=1
-		}
-	else
+	{
+	if [ $ENVIRONMENT = 'dev' ]; then
 		{ # try
 	    	git pull origin dev
 		} || { # catch
 			failedtopull=1
 		}
+	else
+		{ # try
+	    	git pull origin
+		} || { # catch
+			failedtopull=1
+		}
 	fi
+	}||{
+		git pull origin
+	}
 	if [ $failedtopull = 1 ] && [ $giterror = 0 ];then
 		giterror=1
 		fixgiterror
@@ -44,6 +48,7 @@ gitpull()
 		giterror=2
 		fixgiterroragain
 		gitpull
+		yarn install	#assume modules are also broken
 		fi
 	fi
 }
@@ -58,8 +63,9 @@ setdate()
 #but we do need to run it in new devices...
 updatemodules()
 {
-	yarn add  node-html-encoder
-	yarn add string_decoder
+	#yarn add  node-html-encoder
+	#yarn add string_decoder
+	yarn install
 }
 
 
@@ -78,6 +84,7 @@ main()
 	set +a # stop exporting
 
 	#update first, just in case things are broken and it fails to start completely
+	wget http://196.207.140.183:3000/traceme/resources/config.conf -O config/config.js
 	gitpull
 	setdate
 	updatemodules

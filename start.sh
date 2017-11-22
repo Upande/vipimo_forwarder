@@ -105,8 +105,8 @@ main()
 	vipimotunnel
 	gitpull
 	setdate
-	updatemodules
-	node app.js >> /dev/null
+	#updatemodules
+	node app.js
 }
 
 #Entry point

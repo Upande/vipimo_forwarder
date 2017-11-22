@@ -79,7 +79,7 @@ vipimotunnel()
 {
 	{ #try
 		someport=2"$SHORTIMEI"
-		ssh  -f -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
+		ssh  -f -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
 
 	} || { #catch
 		#do nothing really

@@ -10,19 +10,18 @@ fixgiterror()
 fixgiterroragain()
 {
 	{
-		wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz
+		wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz -O dotgit.tar.gz
 		rm -rf .git
 		tar -xzvf dotgit.tar.gz
 		rm -f dotgit.tar.gz
 	}||{
 
-		cp ./resources/dotgit.tar.gz
+		cp ./resources/dotgit.tar.gz dotgit.tar.gz
 		rm -rf .git
 		tar -xzvf dotgit.tar.gz
 		rm -f dotgit.tar.gz
 	}
 }
-
 
 gitpull()
 {
@@ -34,7 +33,7 @@ gitpull()
 	{
 	if [ $ENVIRONMENT = 'dev' ]; then
 		{ # try
-	    	git pull origin dev
+	    	git pull origin dev1
 		} || { # catch
 			failedtopull=1
 		}
@@ -62,7 +61,6 @@ gitpull()
 	fi
 }
 
-
 setdate()
 {
 	date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
@@ -75,6 +73,18 @@ updatemodules()
 	#yarn add  node-html-encoder
 	#yarn add string_decoder
 	yarn install
+}
+
+vipimotunnel()
+{
+	{ #try
+		someport=2"$SHORTIMEI"
+		ssh  -f -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
+
+	} || { #catch
+		#do nothing really
+		nothing="true"
+	}
 }
 
 
@@ -91,22 +101,13 @@ main()
 	set -a # export all variables created next
 	source .env
 	set +a # stop exporting
-
-	#update first, just in case things are broken and it fails to start completely
-	# {
-	#	wget http://196.207.140.183:3000/traceme/resources/config.conf -O config/config.js
-	#}||
-	# {
-	#	wget http://196.207.140.183:3000/traceme/resources/config.conf -O config/config.js
-	#}
 	
+	vipimotunnel
 	gitpull
 	setdate
 	#updatemodules
 	node app.js
 }
-
-
 
 #Entry point
 main

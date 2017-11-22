@@ -10,13 +10,12 @@ fixgiterror()
 fixgiterroragain()
 {
 	{
-		wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz -O dotgit.tar.gz
+		cp ./resources/dotgit.tar.gz dotgit.tar.gz
 		rm -rf .git
 		tar -xzvf dotgit.tar.gz
-		rm -f dotgit.tar.gz
+		rm -f dotgit.tar.gz	
 	}||{
-
-		cp ./resources/dotgit.tar.gz dotgit.tar.gz
+		wget https://raw.githubusercontent.com/upandeltd/kcs_forwarder/dev/resources/dotgit.tar.gz -O dotgit.tar.gz
 		rm -rf .git
 		tar -xzvf dotgit.tar.gz
 		rm -f dotgit.tar.gz
@@ -42,13 +41,16 @@ gitpull()
 	    	#git pull origin
 	    	git fetch --all
 	    	git reset --hard origin/master
-	    	git pull origin master
+	    	#git pull origin master
 		} || { # catch
 			failedtopull=1
 		}
 	fi
 	}||{
-		git pull origin
+
+		fixgiterroragain
+		git fetch --all
+	    git reset --hard origin/master
 	}
 	if [ $failedtopull = 1 ] && [ $giterror = 0 ];then
 		giterror=1

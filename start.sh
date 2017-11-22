@@ -33,7 +33,7 @@ gitpull()
 	{
 	if [ $ENVIRONMENT = 'dev' ]; then
 		{ # try
-	    	git pull origin dev
+	    	git pull origin dev1
 		} || { # catch
 			failedtopull=1
 		}

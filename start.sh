@@ -39,7 +39,10 @@ gitpull()
 		}
 	else
 		{ # try
-	    	git pull origin
+	    	#git pull origin
+	    	git fetch --all
+	    	git reset --hard origin/master
+	    	git pull origin master
 		} || { # catch
 			failedtopull=1
 		}

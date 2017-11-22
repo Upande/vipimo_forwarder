@@ -79,7 +79,7 @@ vipimotunnel()
 {
 	{ #try
 		someport=2"$SHORTIMEI"
-		ssh  -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
+		ssh  -f -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
 
 	} || { #catch
 		#do nothing really
@@ -102,9 +102,9 @@ main()
 	source .env
 	set +a # stop exporting
 	
+	vipimotunnel
 	gitpull
 	setdate
-	vipimotunnel
 	#updatemodules
 	node app.js
 }

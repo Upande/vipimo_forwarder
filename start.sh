@@ -79,8 +79,8 @@ vipimotunnel()
 {
 	{ #try
 		someport=2"$SHORTIMEI"
-		ssh  -f -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
-
+		#ssh  -f -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
+		./connect.sh $someport &
 	} || { #catch
 		#do nothing really
 		nothing="true"
@@ -105,8 +105,8 @@ main()
 	vipimotunnel
 	gitpull
 	setdate
-	#updatemodules
-	node app.js
+	updatemodules
+	node app.js >> /dev/null
 }
 
 #Entry point

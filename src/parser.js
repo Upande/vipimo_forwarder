@@ -113,15 +113,70 @@ class parser
 		self.imei = imei;
 		console.log(devArr+":"+imei)
 		console.log(hexstring)
-		// console.log(payload)
 		self.payload = payload;
 		self.hexstring = hexstring;
-		// console.log("-----------------")
 
 		self.kcs_encode(function(err, result){
 			if(err)return;
 		})
 	}
+
+
+	decodev1()
+	{
+		let self = this;
+		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
+		let devArr = self.devArr
+		var NwkSKey = new Buffer("2B7E151628AED2A6ABF7158809CF4F3C", 'hex');
+		let AppSKey = new Buffer("2B7E151628AED2A6ABF7158809CF4F3C", 'hex');
+		let payload = lora_packet.decrypt(packet, AppSKey, NwkSKey);
+		let hexstring = payload.toString('hex');
+		let imei = self.DevAddrToFakeImei(devArr)
+		self.imei = imei;
+		console.log(devArr+":"+imei)
+		console.log(hexstring)
+		self.payload = payload;
+		self.hexstring = hexstring;
+		// console.log(hexstring)
+
+		// console.log(`LITTLE ENDIAN: ${hexstring}`)
+		let statusbyte = '0x'+hexstring.substr(0, 2)
+		let statusbits = parseInt(statusbyte)
+		// console.log(`status bits: ${statusbyte} ->${statusbits} -> 0b${(+statusbits).toString(2)}`)
+		let validtemp = (statusbits & 1);
+		// console.log(`Valid Humidity sensor temp: 0b${(+statusbits).toString(2)} & 0x01 -> ${validtemp}`)
+
+		if(validtemp === 1)
+		{
+			let temp = hexstring.substr(6, 4)
+			let temp1 = parseInt('0x'+temp)
+			let temp11 = ((temp1 & 0xff00)>> 8) //+ (temp1 & 0x00ff)<< 8
+			let temp111 =  (temp1 & 0x00ff)<< 8
+			temp111+= temp11
+			temp = temp111.toString(16)
+			temp1 = parseInt('0x'+temp)
+			let tempfinal = -45 + 175 * (temp1/65535)
+			// console.log(`temperature value (bytes 3 & 4): 0x${temp} -> ${temp1} => ${tempfinal} degrees Celcius `)
+			tempfinal = Math.floor(tempfinal/0.0625);
+			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
+			tempfinal = tempfinal.toString(16);
+			if(tempfinal.length < 4) tempfinal = '0'+tempfinal
+			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
+
+			self.hexstring = "24000000000000000000000000000000000000000000000000"+tempfinal+"0000"
+			// console.log(self.hexstring)
+			self.payload = new Buffer(self.hexstring, 'hex')
+			// console.log(self.payload)
+			self.kcs_encode(function(err, result){
+				if(err)return;
+			})
+
+
+		}
+	}
+
+
+
 
 	/*static*/ getdevAddr(callback)
 	{
@@ -423,6 +478,7 @@ class parser
 	    }
 	    return bytes;
 	}
+
 }
 
 

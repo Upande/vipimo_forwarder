@@ -30,16 +30,25 @@ server.on('error',function(error){
 server.on('message',function(msg_in,info){
   Async.auto({
     start: function (dones) {
-	let decoder = new StringDecoder('utf8');
-	let msg2 = msg_in.slice(12, msg_in.length)
-	msg2 = Buffer.from(msg2);
-	msg2 = decoder.write(msg2);
+  let decoder = new StringDecoder('utf8');
+  let msg2 = msg_in.slice(12, msg_in.length)
+  msg2 = Buffer.from(msg2);
+  msg2 = decoder.write(msg2);
       kcs_forwarder.init(msg2, info, function(err, result){
         if(!err)
         {
           kcs_forwarder.getdevAddr(function(err, devAddr){
-            kcs_forwarder.decode();
-            kcs_forwarder.sendsignalmsg(devAddr);
+            console.log(devAddr)
+            if(devAddr === '0702D663')
+            {
+              kcs_forwarder.decodev1();
+              kcs_forwarder.sendsignalmsg(devAddr);
+            }
+            else
+            {
+              kcs_forwarder.decode();
+              kcs_forwarder.sendsignalmsg(devAddr);
+            }
           })
           
         }
@@ -47,8 +56,6 @@ server.on('message',function(msg_in,info){
       });
     },
  })
-  
-
 });
 
 //emits when socket is ready and listening for datagram msgs

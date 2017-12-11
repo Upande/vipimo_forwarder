@@ -4,3 +4,5 @@ config/config.js
 src/try.js
 config/gatewayconfig.js
 *.pem
+*.bac
+

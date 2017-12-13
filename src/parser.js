@@ -163,7 +163,27 @@ class parser
 			if(tempfinal.length < 4) tempfinal = '0'+tempfinal
 			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
 
-			self.hexstring = "24000000000000000000000000000000000000000000000000"+tempfinal+"0000"
+			
+			let humidity = hexstring.substr(2, 4)
+			let humidity1 = parseInt('0x'+humidity)
+			let humidity11 = ((humidity1 & 0xff00)>> 8) //+ (humidity1 & 0x00ff)<< 8
+			let humidity111 =  (humidity1 & 0x00ff)<< 8
+			humidity111+= humidity11
+			humidity = humidity111.toString(16)
+			humidity1 = parseInt('0x'+humidity)
+			let humidityfinal = 100 * humidity1 / 65535
+			// console.log(`humidityerature value (bytes 3 & 4): 0x${humidity} -> ${humidity1} => ${humidityfinal} degrees Celcius `)
+			humidityfinal = Math.floor(humidityfinal);
+
+			humidityfinal = humidityfinal.toString(16);
+			let len;
+			if((len =humidityfinal.length) < 4)
+			{
+				for(let i = len; i<4; i++) humidityfinal = '0'+humidityfinal
+			}
+
+				// humidityfinal = '0'+humidityfinal
+			self.hexstring = "2400000000000000000000000000000000000000000000"+humidityfinal+tempfinal+"0000"
 			// console.log(self.hexstring)
 			self.payload = new Buffer(self.hexstring, 'hex')
 			// console.log(self.payload)

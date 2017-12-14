@@ -157,9 +157,12 @@ class parser
 			temp1 = parseInt('0x'+temp)
 			let tempfinal = -45 + 175 * (temp1/65535)
 			// console.log(`temperature value (bytes 3 & 4): 0x${temp} -> ${temp1} => ${tempfinal} degrees Celcius `)
-			tempfinal = Math.floor(tempfinal);
+			// tempfinal = Math.floor(tempfinal);
 			let humiditytemp = tempfinal
-			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
+			tempfinal /= 0.0625;
+			tempfinal = Math.floor(tempfinal);
+			
+			console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
 			tempfinal = tempfinal.toString(16);
 			let len;
 			if((len =tempfinal.length) < 4)
@@ -194,7 +197,7 @@ class parser
 				let temp111 =  (temp1 & 0x00ff)<< 8
 				temp111+= temp11
 				temp111 /= 100
-				console.log(`Barometer temperature: ${temp1} ${temp111} but humidity temp: ${humiditytemp}`)
+				console.log(`Barometer temperature: ${temp1} ${temp111} but humidity temp: ${humiditytemp/0.0625}`)
 				temp = temp111.toString(16)
 				temp1 = parseInt('0x'+temp)
 				// let tempbaromenterfinal = -45 + 175 * (temp1/65535)

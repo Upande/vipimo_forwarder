@@ -210,9 +210,9 @@ class parser
 			console.log(self.hexstring.length)
 			self.payload = new Buffer(self.hexstring, 'hex')
 			// console.log(self.payload)
-			// self.kcs_encode(function(err, result){
-			// 	if(err)return;
-			// })
+			self.kcs_encode(function(err, result){
+				if(err)return;
+			})
 
 
 		}

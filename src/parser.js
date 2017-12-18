@@ -157,19 +157,62 @@ class parser
 			temp1 = parseInt('0x'+temp)
 			let tempfinal = -45 + 175 * (temp1/65535)
 			// console.log(`temperature value (bytes 3 & 4): 0x${temp} -> ${temp1} => ${tempfinal} degrees Celcius `)
-			tempfinal = Math.floor(tempfinal/0.0625);
+			tempfinal = Math.floor(tempfinal);
+			let humiditytemp = tempfinal
 			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
 			tempfinal = tempfinal.toString(16);
-			if(tempfinal.length < 4) tempfinal = '0'+tempfinal
+			let len;
+			if((len =tempfinal.length) < 4)
+				for(let i = len; i<4; i++) tempfinal = '0'+tempfinal
 			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
 
-			self.hexstring = "24000000000000000000000000000000000000000000000000"+tempfinal+"0000"
-			// console.log(self.hexstring)
+			
+			let humidity = hexstring.substr(2, 4)
+			let humidity1 = parseInt('0x'+humidity)
+			let humidity11 = ((humidity1 & 0xff00)>> 8) //+ (humidity1 & 0x00ff)<< 8
+			let humidity111 =  (humidity1 & 0x00ff)<< 8
+			humidity111+= humidity11
+			humidity = humidity111.toString(16)
+			humidity1 = parseInt('0x'+humidity)
+			let humidityfinal = 100 * humidity1 / 65535
+			// console.log(`humidityerature value (bytes 3 & 4): 0x${humidity} -> ${humidity1} => ${humidityfinal} degrees Celcius `)
+			humidityfinal = Math.floor(humidityfinal);
+
+			humidityfinal = humidityfinal.toString(16);
+			if((len =humidityfinal.length) < 4)
+				for(let i = len; i<4; i++) humidityfinal = '0'+humidityfinal
+
+			statusbyte = '0x'+hexstring.substr(2, 2)
+			statusbits = parseInt(statusbyte)
+			let validbarometertemp = (statusbits & 1);
+
+			if(validbarometertemp === 1)
+			{
+				let temp = hexstring.substr(13*2, 2*2)
+				let temp1 = parseInt('0x'+temp)
+				let temp11 = ((temp1 & 0xff00)>> 8) //+ (temp1 & 0x00ff)<< 8
+				let temp111 =  (temp1 & 0x00ff)<< 8
+				temp111+= temp11
+				temp111 /= 100
+				console.log(`Barometer temperature: ${temp1} ${temp111} but humidity temp: ${humiditytemp}`)
+				temp = temp111.toString(16)
+				temp1 = parseInt('0x'+temp)
+				// let tempbaromenterfinal = -45 + 175 * (temp1/65535)
+				// tempbaromenterfinal = Math.floor(tempbaromenterfinal/0.0625);
+				// tempbaromenterfinal = tempbaromenterfinal.toString(16);
+				// if(tempbaromenterfinal.length < 4) tempbaromenterfinal = '0'+tempbaromenterfinal
+
+			}
+
+					// humidityfinal = '0'+humidityfinal
+			self.hexstring = "2400000000000000000000000000000000000000000000"+humidityfinal+tempfinal+"0000"
+			console.log(self.hexstring)
+			console.log(self.hexstring.length)
 			self.payload = new Buffer(self.hexstring, 'hex')
 			// console.log(self.payload)
-			self.kcs_encode(function(err, result){
-				if(err)return;
-			})
+			// self.kcs_encode(function(err, result){
+			// 	if(err)return;
+			// })
 
 
 		}

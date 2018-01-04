@@ -63,10 +63,10 @@ class parser
 		Async.each(kcsserver, function(url, callback) {
 			url = url.replace("upload.php","uploadsignal.php");
 		    let sendto = url +strtosend;
-		    console.log('Sending to  ' + sendto);
+		    // console.log('Sending to  ' + sendto);
 
 		    request(sendto, function (error, response, body) {
-				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
+				console.log('from kcs signal:', body); // Print the HTML for the Google homepage. 
 				if(error)callback(error)
 				else callback()
 
@@ -141,9 +141,8 @@ class parser
 		number = Math.abs(number)
 		console.log(number)
 		let buffer = new Buffer(self.completehex(number.toString(16)), 'hex');
-
 		let resultBuffer = bitwise.buffer.not(buffer);
-		let ones = bitwise.readUInt(resultBuffer);
+		let ones = bitwise.readUInt(resultBuffer, 0, 16);
 		let twos = ones + 1
 		return twos
 	}
@@ -186,7 +185,7 @@ class parser
 			// console.log(`temperature value (bytes 3 & 4): 0x${temp} -> ${temp1} => ${tempfinal} degrees Celcius `)
 			// tempfinal = Math.floor(tempfinal);
 			let humiditytemp = tempfinal
-			console.log(`SOME TEMP: ${tempfinal}`);
+			// console.log(`SOME TEMP: ${tempfinal}`);
 			tempfinal /= 0.0625;
 			tempfinal = Math.floor(tempfinal);
 			
@@ -205,8 +204,10 @@ class parser
 			// 	tempfinal = tempfinal.toString(16);
 			// 	console.log(`${tempfinal} from hex `)
 			// }
+			// console.log(`SOME TEMP: ${tempfinal}`);
 			tempfinal = self.twoscomplement(tempfinal)
 			tempfinal = tempfinal.toString(16);
+
 
 			let len;
 			if((len =tempfinal.length) < 4)

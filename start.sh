@@ -110,7 +110,8 @@ main()
 	vipimotunnel
 	gitpull
 	setdate
-	#updatemodules
+	./checkInternet.sh &
+	updatemodules	#yarn should not install modules that are already present
 	node app.js
 }
 

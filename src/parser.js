@@ -6,6 +6,8 @@ const gatewayconfig = require('../config/gatewayconfig');
 //const Encoder = require('node-html-encoder').Encoder;
 //const encoder = new Encoder('entity');
 let nodeMon = require("./nodeMonitor")
+const bitwise = require('bitwise');
+
 
 class parser
 {
@@ -121,6 +123,31 @@ class parser
 		})
 	}
 
+	completehex(hex, reqlen = 0)
+	{
+		let self = this
+		if(reqlen === 0 )reqlen = hex.length;
+		if(reqlen % 2 > 0)reqlen++;
+		let len
+		if((len =hex.length) < 4)
+			for(let i = len; i<4; i++) hex = '0'+hex
+		return hex
+	}
+
+	twoscomplement(number)
+	{
+		let self = this
+		if(number >= 0)return number;
+		number = Math.abs(number)
+		console.log(number)
+		let buffer = new Buffer(self.completehex(number.toString(16)), 'hex');
+
+		let resultBuffer = bitwise.buffer.not(buffer);
+		let ones = bitwise.readUInt(resultBuffer);
+		let twos = ones + 1
+		return twos
+	}
+
 
 	decodev1()
 	{
@@ -159,17 +186,34 @@ class parser
 			// console.log(`temperature value (bytes 3 & 4): 0x${temp} -> ${temp1} => ${tempfinal} degrees Celcius `)
 			// tempfinal = Math.floor(tempfinal);
 			let humiditytemp = tempfinal
+			console.log(`SOME TEMP: ${tempfinal}`);
 			tempfinal /= 0.0625;
 			tempfinal = Math.floor(tempfinal);
 			
-			console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
+			// if(tempfinal < 0)
+			// 	console.log(`${tempfinal} .. to hex(from negative) -> ...${~tempfinal.toString(16)}`)
+			// else
+			// 	console.log(`${tempfinal} .. to hex -> ...${tempfinal.toString(16)}`)
+			// if(tempfinal < 0)
+			// {
+			// 	console.log(`was ${tempfinal}`)
+			// 	tempfinal = ~tempfinal.toString(16);
+			// 	console.log(`${tempfinal} .. to hex(from negative) `)
+			// }
+			// else
+			// {
+			// 	tempfinal = tempfinal.toString(16);
+			// 	console.log(`${tempfinal} from hex `)
+			// }
+			tempfinal = self.twoscomplement(tempfinal)
 			tempfinal = tempfinal.toString(16);
+
 			let len;
 			if((len =tempfinal.length) < 4)
 				for(let i = len; i<4; i++) tempfinal = '0'+tempfinal
 			// console.log(`${tempfinal} .....${tempfinal.toString(16)}`)
 
-			
+
 			let humidity = hexstring.substr(2, 4)
 			let humidity1 = parseInt('0x'+humidity)
 			let humidity11 = ((humidity1 & 0xff00)>> 8) //+ (humidity1 & 0x00ff)<< 8
@@ -178,12 +222,15 @@ class parser
 			humidity = humidity111.toString(16)
 			humidity1 = parseInt('0x'+humidity)
 			let humidityfinal = 100 * humidity1 / 65535
+			humidityfinal *= 1000
 			// console.log(`humidityerature value (bytes 3 & 4): 0x${humidity} -> ${humidity1} => ${humidityfinal} degrees Celcius `)
-			humidityfinal = Math.floor(humidityfinal);
+			// humidityfinal = Math.floor(humidityfinal);
+			humidityfinal = Math.floor(humidityfinal);	//divide by 3 on server to get to 3 decimal places
 
 			humidityfinal = humidityfinal.toString(16);
-			if((len =humidityfinal.length) < 4)
-				for(let i = len; i<4; i++) humidityfinal = '0'+humidityfinal
+			let reqhumidityfinallen = 8;
+			if((len =humidityfinal.length) < reqhumidityfinallen)
+				for(let i = len; i<reqhumidityfinallen; i++) humidityfinal = '0'+humidityfinal
 
 			statusbyte = '0x'+hexstring.substr(2, 2)
 			statusbits = parseInt(statusbyte)
@@ -197,7 +244,7 @@ class parser
 				let temp111 =  (temp1 & 0x00ff)<< 8
 				temp111+= temp11
 				temp111 /= 100
-				console.log(`Barometer temperature: ${temp1} ${temp111} but humidity temp: ${humiditytemp/0.0625}`)
+				// console.log(`Barometer temperature: ${temp1} ${temp111} but humidity temp: ${humiditytemp/0.0625}`)
 				temp = temp111.toString(16)
 				temp1 = parseInt('0x'+temp)
 				// let tempbaromenterfinal = -45 + 175 * (temp1/65535)
@@ -208,9 +255,9 @@ class parser
 			}
 
 					// humidityfinal = '0'+humidityfinal
-			self.hexstring = "2400000000000000000000000000000000000000000000"+humidityfinal+tempfinal+"0000"
-			console.log(self.hexstring)
-			console.log(self.hexstring.length)
+			self.hexstring = "24000000000000000000000000000000000000"+humidityfinal+"0000"+tempfinal+"0000"
+			console.log(`temp ${self.hexstring} AND ${humidityfinal} AND ${tempfinal}`)
+			// console.log(self.hexstring.length)
 			self.payload = new Buffer(self.hexstring, 'hex')
 			// console.log(self.payload)
 			self.kcs_encode(function(err, result){

@@ -7,3 +7,4 @@ config/gatewayconfig.js
 *.bac
 *.sublime-workspace
 *.sublime-project
+try.js

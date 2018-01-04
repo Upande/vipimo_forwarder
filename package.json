@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "bitwise": "^0.2.0",
     "confidence": "^3.0.2",
     "cuint": "^0.2.2",
     "dotenv": "^4.0.0",

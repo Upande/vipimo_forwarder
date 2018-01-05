@@ -11,36 +11,53 @@ numechecktimes=$((restarttime / checktime))
 
 function checkconnection(){
 	local isconnected=1
-	while ! ping -w 1 google.com >> /dev/null; do
+	while ! ping -w 1 google.com > /dev/null 2>&1; do
 		isconnected=0
 	    break
 	done
 	echo $isconnected
 }
 
+function reversetunnel(){
+	{
+		{
+			chmod 400 resources/vipimo.pem > /dev/null 2>&1
+		}||{
+			echo "Error setting file permissions or connecting"
+			return 1
+		}
+	}&&{
+		{
+			# ssh  -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@vipimo.co.ke
+			ssh  -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@vipimo.co.ke
+
+		}||{
+			echo "Error creating tunnel"
+			return 2
+		}
+		
+	}
+}
+
 
 numchecked=0
 while :			#continuously check for internet
 do
-   # echo "Pres CTRL+C to stop..."
    {
    		connection=$(checkconnection)
    		if [ $connection = 0 ] ; then
-   			echo no connection
    			numchecked=$((numchecked + 1))
-   			echo CHECKED
-   			echo $numchecked
+   			echo CHECKED $numchecked of $numechecktimes
 
    			if [ $numchecked = $numechecktimes ]; then
-   				reboot	#reboot
+   				echo "Restarting because of no internet"
+   				echo reboot	#reboot
    			fi
    		else
+   			echo CHECKED $numchecked of $numechecktimes
    			numchecked=0
+   			reversetunnel $1
    		fi
    		sleep $checktime
    }
- #   if (disaster-condition)
- #   then
-	# break       	   #abandon the loop.
- #   fi
 done

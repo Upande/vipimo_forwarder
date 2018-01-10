@@ -319,7 +319,7 @@ class parser
 		}
 		let tmp=0;
 		//while(tmp=packet_smallEndian.pop())
-		let digital1, digital2, analog1, analog2, vbat, temperature;
+		let digital1, digital2, analog1, analog2, vbat, temperature, doorstatus;
 
 		while(tmp<hexlen/2)
 		{
@@ -334,6 +334,7 @@ class parser
 		// analog2 = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);
 		// vbat = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);
 		// temperature = packet_bigEndian.pop() + (packet_bigEndian.pop()<<8);     //-32768
+		doorstatus = payload[15];
 		digital1 = (payload[19]<<24) + (payload[20]<<16) + (payload[21]<<8) + payload[22];
 		digital2 = (payload[23]<<8) + payload[24];
 		analog1 = (payload[13]<<8) + payload[14];
@@ -420,7 +421,8 @@ class parser
 		packet33chars.push((digital2<<(sizeofdigital2-2*8))>>(sizeofdigital2-2*8)>>(1*8))
 		packet33chars.push((digital2<<(sizeofdigital2-1*8))>>(sizeofdigital2-1*8)>>(0*8))
 		//door status...2nd bit is door status
-		packet33chars.push(0x43)// or try 1 to make second bit zero
+		// packet33chars.push(0x43)// or try 1 to make second bit zero
+		packet33chars.push(doorstatus);
 		let singleitem = packet33chars.pop();
 		packet33chars.push(singleitem)
 		let singleitemsize = self.roughSizeOfObject(singleitem)

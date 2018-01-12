@@ -30,7 +30,7 @@ function reversetunnel(){
 		{
 			ssh-keygen -f "/root/.ssh/known_hosts" -R vipimo.co.ke
 			# ssh  -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@vipimo.co.ke
-			ssh  -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@vipimo.co.ke
+			ssh  -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@kcs.vipimo.co.ke
 
 		}||{
 			echo "Error creating tunnel"

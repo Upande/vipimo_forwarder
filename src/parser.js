@@ -7,6 +7,7 @@ const gatewayconfig = require('../config/gatewayconfig');
 //const encoder = new Encoder('entity');
 let nodeMon = require("./nodeMonitor")
 const bitwise = require('bitwise');
+const shell = require('shelljs');
 
 
 class parser
@@ -29,7 +30,7 @@ class parser
 		let self = this;
 		self.clear_vars();
   	 	console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
-		console.log(msg);
+		// console.log(msg);
 		let is_data;
 		try
 		{
@@ -51,6 +52,7 @@ class parser
 
 	/*static*/ sendsignalmsg(devArr)
 	{
+		
 		let self = this;
 		let kcsserver = config.get("/kcsserver");
 		//let gatewayIMEI = gatewayconfig.get("/IMEI");
@@ -89,16 +91,8 @@ class parser
 		// console.log(self.msg)
 		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
 
-		// debug: prints out contents
-		// - contents depend on packet type
-		// - contents are named based on LoRa spec
-		// console.log("packet.toString()=\n" + packet);
-		// let devArr = self.getdevAddr(packet.toString())
 		let devArr = self.devArr
-		// e.g. retrieve payload elements
-		// console.log("packet MIC=" + packet.getBuffers().MIC.toString('hex'));
-		// console.log("FRMPayload=" + packet.getBuffers().FRMPayload.toString('hex'));
-
+		
 		// check MIC
 		var NwkSKey = new Buffer(config.get("/NwkSKey"), 'hex');
 		// console.log("MIC check=" + (lora_packet.verifyMIC(packet, NwkSKey) ? "OK" : "fail"));
@@ -109,12 +103,19 @@ class parser
 		// decrypt payload
 		let AppSKey = new Buffer(config.get("/AppSKey"), 'hex');
 		// console.log("Decrypted='" + lora_packet.decrypt(packet, AppSKey, NwkSKey).toString() + "'");
+		let ind;
+		let savestr = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' });
+		// for(ind in packet._packet)
+			// savestr += `::::::${packet._packet[ind].toString('hex')}`
+
+		savestr += `::${self.devArr}::${self.msg}`
+		let cmd = `echo ${savestr} >> logs`
+		let child = shell.exec(cmd, {async:true, silent:true});  //0000008D 
+
 		let payload = lora_packet.decrypt(packet, AppSKey, NwkSKey);
 		let hexstring = payload.toString('hex');
 		let imei = self.DevAddrToFakeImei(devArr)
 		self.imei = imei;
-		console.log(devArr+":"+imei)
-		console.log(hexstring)
 		self.payload = payload;
 		self.hexstring = hexstring;
 
@@ -139,7 +140,6 @@ class parser
 		let self = this
 		if(number >= 0)return number;
 		number = Math.abs(number)
-		console.log(number)
 		let buffer = new Buffer(self.completehex(number.toString(16)), 'hex');
 		let resultBuffer = bitwise.buffer.not(buffer);
 		let ones = bitwise.readUInt(resultBuffer, 0, 16);
@@ -159,8 +159,8 @@ class parser
 		let hexstring = payload.toString('hex');
 		let imei = self.DevAddrToFakeImei(devArr)
 		self.imei = imei;
-		console.log(devArr+":"+imei)
-		console.log(hexstring)
+		// console.log(devArr+":"+imei)
+		// console.log(hexstring)
 		self.payload = payload;
 		self.hexstring = hexstring;
 		// console.log(hexstring)
@@ -257,7 +257,7 @@ class parser
 
 					// humidityfinal = '0'+humidityfinal
 			self.hexstring = "24000000000000000000000000000000000000"+humidityfinal+"0000"+tempfinal+"0000"
-			console.log(`temp ${self.hexstring} AND ${humidityfinal} AND ${tempfinal}`)
+			// console.log(`temp ${self.hexstring} AND ${humidityfinal} AND ${tempfinal}`)
 			// console.log(self.hexstring.length)
 			self.payload = new Buffer(self.hexstring, 'hex')
 			// console.log(self.payload)
@@ -278,11 +278,6 @@ class parser
 		// console.log(self.msg)
 		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
 		let msg = packet.toString();
-		// debug: prints out contents
-		// - contents depend on packet type
-		// - contents are named based on LoRa spec
-		// console.log("packet.toString()=\n" + packet);
-		// let devArr = self.getdevAddr(packet.toString())
 		let devArr;
 		try
 		{
@@ -305,6 +300,7 @@ class parser
 		let self = this;
 		let hexstring = self.hexstring
 		let payload = self.payload;
+		
 		if(payload[0] !== 0x24 && payload[0] !== 0x23)return callback("invalid payload received");
 
 		let packet_bigEndian = [];
@@ -350,15 +346,15 @@ class parser
 
 		/////////////////////////////////////////////////////////////////
 		//console.log(packet_bigEndian)
-		console.log("digital1:"+digital1)
-		console.log("digital2:"+digital2)
-		console.log("analog1:"+analog1)
-		console.log("analog2:"+analog2)
+		// console.log("digital1:"+digital1)
+		// console.log("digital2:"+digital2)
+		// console.log("analog1:"+analog1)
+		// console.log("analog2:"+analog2)
 		vbat *= 1000;
-		console.log("vbat(mV):"+vbat)
+		// console.log("vbat(mV):"+vbat)
 		vbat /= 1000;
-		console.log("vbat(V):"+vbat)
-		console.log("temperature (in enclosure...):"+temperature)
+		// console.log("vbat(V):"+vbat)
+		// console.log("temperature (in enclosure...):"+temperature)
 
 		let time = Math.floor(Date.now() / 1000)//timestamp in seconds
 		let sizeoftime = self.roughSizeOfObject(time)
@@ -392,7 +388,7 @@ class parser
 		temperature *= 0.0625;
 		temperature = (temperature+60) * 256
 		 
-		                                                                                                console.log("temperature (in enclosure...):"+temperature)
+		                                    // console.log("temperature (in enclosure...):"+temperature)
 		packet33chars.push((temperature<<(sizeoftemperature-2*8))>>(sizeoftemperature-2*8)>>(1*8))
 		packet33chars.push((temperature<<(sizeoftemperature-1*8))>>(sizeoftemperature-1*8)>>(0*8))
 
@@ -480,7 +476,7 @@ class parser
 		let packetstosendbigEndian = []
 		for(tmp= 0; tmp<packetind;tmp++)packetstosendbigEndian.push(packetstosend.pop())
 		//packetind = roughSizeOfObject(packet33charsinverted)/singleitemsize-1
-		console.log("packetind: "+packetind)
+		// console.log("packetind: "+packetind)
 		let c = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
 
 		let strtosend = '';
@@ -490,7 +486,7 @@ class parser
 		    strtosend += c[ind]
 		}
 		strtosend = self.imei+"|"+strtosend;
-		console.log(strtosend)
+		// console.log(strtosend)
 
 		let kcsserver = config.get("/kcsserver");
 

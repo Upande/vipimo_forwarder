@@ -425,6 +425,10 @@ node-aes-cmac@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/node-aes-cmac/-/node-aes-cmac-0.1.1.tgz#9bfff86b2f63e3949e2828bd85f5b6825b702844"
 
+node-bitarray@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/node-bitarray/-/node-bitarray-0.1.0.tgz#6d257076a81b849e7c212cbf733c5cf5dbfc0888"
+
 node-html-encoder@^0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/node-html-encoder/-/node-html-encoder-0.0.2.tgz#8973618d727da5526a830b47d07c0d803e0a15c6"

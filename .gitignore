@@ -8,4 +8,7 @@ config/gatewayconfig.js
 *.sublime-workspace
 *.sublime-project
 try.js
+try*.js
 todo
+logs
+tmp.txt

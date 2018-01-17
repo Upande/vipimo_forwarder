@@ -19,6 +19,7 @@
     "dotenv": "^4.0.0",
     "fs-extra": "^4.0.1",
     "lora-packet": "^0.6.0",
+    "node-bitarray": "^0.1.0",
     "node-html-encoder": "^0.0.2",
     "request": "^2.81.0",
     "shelljs": "^0.7.8",

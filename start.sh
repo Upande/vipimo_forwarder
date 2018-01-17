@@ -66,10 +66,10 @@ gitpull()
 	fi
 }
 
-setdate()
-{
-	date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
-}
+# setdate()
+# {
+# 	date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+# }
 
 #we do not need to run this over and over in single device
 #but we do need to run it in new devices...
@@ -109,7 +109,7 @@ main()
 	
 	vipimotunnel
 	gitpull
-	setdate
+	#setdate
 	# ./checkInternet.sh &
 	updatemodules	#yarn should not install modules that are already present
 	node app.js

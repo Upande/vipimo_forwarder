@@ -18,6 +18,11 @@ function checkconnection(){
 	echo $isconnected
 }
 
+function setdate()
+{
+	date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+}
+
 function reversetunnel(){
 	{
 		{
@@ -28,12 +33,15 @@ function reversetunnel(){
 		}
 	}&&{
 		{
+			
 			{
+				ssh  -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@kcs.vipimo.co.ke
+
+			}||{
 				ssh-keygen -f "/root/.ssh/known_hosts" -R vipimo.co.ke
 			}||{
 				mv /root/.ssh/known_hosts /root/.ssh/known_hosts.bac
 			}
-			ssh  -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@kcs.vipimo.co.ke
 
 		}||{
 			echo "Error creating tunnel"
@@ -61,6 +69,7 @@ do
    			echo CHECKED $numchecked of $numechecktimes
    			numchecked=0
    			reversetunnel $1
+   			setdate
    		fi
    		sleep $checktime
    }

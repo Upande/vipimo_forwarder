@@ -38,7 +38,7 @@ function reversetunnel(){
 				ssh  -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes -i resources/vipimo.pem -R $1:localhost:22 -N vipimo@kcs.vipimo.co.ke
 
 			}||{
-				ssh-keygen -f "/root/.ssh/known_hosts" -R vipimo.co.ke
+				ssh-keygen -f "/root/.ssh/known_hosts" -R kcs.vipimo.co.ke
 			}||{
 				mv /root/.ssh/known_hosts /root/.ssh/known_hosts.bac
 			}

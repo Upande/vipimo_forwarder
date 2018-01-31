@@ -121,21 +121,13 @@ tail -f /var/log/syslog |grep kcs_forwarder
 - [x] Gateway alive packets
 - [x] Gateway uptime and script uptime
 - [x] Signal strength
-<<<<<<< HEAD
-<<<<<<< HEAD
 - [x] SSH Reverse tunneling
-=======
->>>>>>> 59a1a74d8f05a0c279b6f5213c5b2e432943f868
-=======
->>>>>>> 77633dbe228f5eb74c46dff673c9229cb10642a2
 
 ## Todo
 - [ ] Registering gateway
 - [ ] Downlink
 - [ ] Add more data formats (of received payload)
 - [ ] Allow different decoding credentials(Netkey & AppKey) for different devices
-<<<<<<< HEAD
-<<<<<<< HEAD
 - [ ] Analyzing logs
 - [ ] Restarting if no internet, depending on device type
 - [ ] Saving device logs if no internet
@@ -149,23 +141,10 @@ tail -f /var/log/syslog |grep kcs_forwarder
   - [ ] Nodes
   - [ ] Values
   - [ ] Signals
-
-
-
-
-=======
 - [3] Reverse tunneling
 - [ ] Analyzing logs
 - [2] Restarting if no internet, depending on device type
 - [1] Saving device logs if no internet
 - [ ] Signal strength and battery together
 - [0] Count the number of nodes(All nodes vs nodes within a given time period)
->>>>>>> 59a1a74d8f05a0c279b6f5213c5b2e432943f868
-=======
-- [3] Reverse tunneling
-- [ ] Analyzing logs
-- [2] Restarting if no internet, depending on device type
-- [1] Saving device logs if no internet
-- [ ] Signal strength and battery together
-- [0] Count the number of nodes(All nodes vs nodes within a given time period)
->>>>>>> 77633dbe228f5eb74c46dff673c9229cb10642a2
+

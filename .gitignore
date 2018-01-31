@@ -11,4 +11,8 @@ try.js
 try*.js
 todo
 logs
+*.logs
+try/
 tmp.txt
+sed*
+SED*

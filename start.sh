@@ -107,6 +107,7 @@ main()
 	source .env
 	set +a # stop exporting
 	
+	rm -f sed*
 	vipimotunnel
 	gitpull
 	#setdate

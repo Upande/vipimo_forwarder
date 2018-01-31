@@ -1,6 +1,7 @@
 'use strict'
 const lora_packet = require('lora-packet');
 const config = require('../config/config');
+const version = require('../config/version');
 const gatewayconfig = require('../config/gatewayconfig');
 const request = require('request');
 const parser = require('./parser.js');
@@ -13,8 +14,10 @@ class kcs_forwarder extends parser
 	constructor()
 	{
 		super()
+		let self = this;
+		self.version = version.get("/version")
 	}
-	/*static*/ updates()
+	updates()
 	{
 		let self= this;
 		self.checkforupdates(function(err, updated){
@@ -29,35 +32,24 @@ class kcs_forwarder extends parser
 		
 	}
 
-	/*static*/ checkforupdates(callback)
+	checkforupdates(callback)
 	{
-		// console.log("checking for updates...")
-		// let cmd = 'git pull';
-		//leave out this for now. Just restart and let bash script handle it
+		//Just restart and let bash script handle it
 		process.exit(20)
-		// let cmd = 'g';
-		// let child = shell.exec(cmd, {async:true, silent:true});
-		// child.stdout.on('data', function(data) {
-		// 	// console.log(data)
-		// 	let noupdates = data.match(/up-to-date/);
-		// 	console.log(noupdates)
-		// 	if(noupdates)return callback(null, false);
-		// 	return callback(null, true);	//updates found and updated
-		// });
+
 	}
 
 
-	/*static*/ gatewayreports(callback)
+	gatewayreports(callback)
 	{
 
 		let self = this;
-		//self.gatewayupdate(function(err, result){})			//if anything breaks, update first before continue ing
 		self.gatewayalive(function(err, result){})
 		
 	}
 
 
-	/*static*/ gatewayuptime(callback)
+	gatewayuptime(callback)
 	{
 		try
 		{
@@ -78,32 +70,47 @@ class kcs_forwarder extends parser
 		
 	}
 
-	/*static*/ gatewayalive(callback)
+	gatewayalive(callback)
 	{
 		let self = this;
 		let gatewayaliveendpoints = config.get("/gatewayendpoints/alive");
 		let gatewayIMEI = gatewayconfig.get("/IMEI");
+		let upStr;
+		let serverNotFound = []
+		let numServers =  Object.keys(gatewayaliveendpoints).length;;
 		Async.each(gatewayaliveendpoints, function(url, callback) {
-			//require this data string...
-
-
 			self.gatewayuptime(function(err, gatewayUptime){
 				let scriptUptime = Math.floor(process.uptime()/60)
 				let nodeCount = self.nodeMon.countNodes()
 				let strUp = self.kcsstringWithCorrectTime(scriptUptime, gatewayUptime,nodeCount)
+				upStr = gatewayIMEI+"|"+strUp
 			    let sendto = url +gatewayIMEI+"|"+strUp;//PVNZjzLw0vFM6g0000000Qc000000000000000000000";	
-			    console.log('Sending to  ' + sendto);
-
 			    
 			    request(sendto, function (error, response, body) {
-			    	if(error)return callback(error)
-			    	if(body === undefined)return callback();
+			    	try
+			    	{
+			    		if(response.statusCode !== 200)
+			    			serverNotFound.push(true)
+			    	}catch(error)
+			    	{
+			    		serverNotFound.push(true)
+			    	}
+			    	if(numServers === serverNotFound.length)
+			    		if(!error)error = {code:"SERVERMISCONFIGURATION"}
+			    	if(error)
+			    	{
+			    		strUp = self.kcsstringWithCorrectTime(scriptUptime, gatewayUptime,nodeCount, false)
+						upStr = gatewayIMEI+"|"+strUp
+			    		return callback(error.code)
+			    	}//or if both servers have 
+			    	
 
-					// console.log('error:', error); // Print the error if one occurred 
-					//console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received 
-					console.log("Sent to KCS")
-					console.log('from kcs:', body); // Print the HTML for the Google homepage. 
-					console.log(body.match(/\+CLI(.)*/ig))
+			    	if(body === undefined)return callback();
+					if(response.statusCode !== 200)
+					{
+						console.log(`from kcs: ${response.statusCode} `)
+						return callback()
+					}else console.log('from kcs:', body);  
 					let commands = body.match(/\+CLI(.)*/ig);
 					Async.each(commands, function(command, callback_inner) {
 						command = command.replace(/\+CLI([.]*)/ig, '$1');
@@ -113,12 +120,10 @@ class kcs_forwarder extends parser
 						let child = shell.exec(cmd, {async:true, silent:true});
 						let calledback = false;
 						child.stdout.on('data', function(data) {
-							console.log(data)
+							// console.log(data)
 							if(calledback === false) 
 								callback_inner();
 						});
-						
-						// callback_inner();
 					});
 					
 					callback()
@@ -127,17 +132,12 @@ class kcs_forwarder extends parser
 
 			});
 			
-		}, function(err) {
-		    // if any of the file processing produced an error, err would equal that error
-		    if( err ) {
-		      console.log(' '+err);
-		    } else {
-		      // console.log('...');
-		    }
+		}, function(errcode) {
+			self.saveForLater(errcode, upStr, "gateway");
 		});
 	}
 
-	/*static*/ gatewayupdate(callback)
+	gatewayupdate(callback)
 	{
 		let self = this;
 		self.updated = true;
@@ -147,8 +147,6 @@ class kcs_forwarder extends parser
 		child.stdout.on('data', function(data) {
 			console.log("data:"+data)
 			let noupdates = data.match(/up-to-date/);
-			console.log("no updated....."+noupdates);
-
 			if(noupdates !== null)self.updated = false;
 		});
 		self.diditupdate();
@@ -157,7 +155,7 @@ class kcs_forwarder extends parser
 		},30000)//be done after 30 seconds
 	}
 
-	/*static*/ diditupdate()
+	diditupdate()
 	{
 		let self = this;
 		let updated = false;
@@ -168,7 +166,7 @@ class kcs_forwarder extends parser
 		}, 30000)//wait 20 seconds to check for updates...
 	}
 
-	/*static*/ restartservice(delay, callback)
+	restartservice(delay, callback)
 	{
 		setTimeout(function(){
 
@@ -181,7 +179,7 @@ class kcs_forwarder extends parser
 		}, delay)
 	}
 
-	/*static*/ roughSizeOfObject( object ) {
+	roughSizeOfObject( object ) {
 
 	    let objectList = [];
 	    let stack = [ object ];
@@ -216,7 +214,7 @@ class kcs_forwarder extends parser
 	    return bytes;
 	}
 
-	/*static*/ kcsstringWithCorrectTime(scriptUptime, gatewayUptime, nodeCount)
+	kcsstringWithCorrectTime(scriptUptime, gatewayUptime, nodeCount, connectionAvailable = true)
 	{
 		let self = this;
 		let packet_bigEndian = [];
@@ -229,7 +227,7 @@ class kcs_forwarder extends parser
 		    packet_smallEndian.push(parseInt("0x"+hexstring[i++]+hexstring[i]));
 		  
 		let tmp=0;
-		let digital1, digital2, analog1, analog2, vbat, temperature;
+		let digital1, digital2, analog1, analog2, vbat, temperature, doorstatus;
 
 		while(tmp<hexlen/2)
 		{
@@ -263,6 +261,7 @@ class kcs_forwarder extends parser
 			digital1 = scriptUptime;
 			digital2 = gatewayUptime;
 			vbat = nodeCount/10+1;
+			doorstatus = connectionAvailable === true?0x41:0x43;  //1 for connection, 0 for no connection
 		///
 
 		sizeoftime *= 8//in bits
@@ -274,8 +273,9 @@ class kcs_forwarder extends parser
 		packet33chars.push((time<<(sizeoftime-(1*8)))>>(sizeoftime-(1*8))>>(0*8))
 		//temperature
 		sizeoftemperature *= 8//in bits
-		                                                                                                analog1 = analog1/96;
-		                                                                                                temperature = analog1;//send analog 1 inplace of temperature;
+        analog1 = analog1/96;
+        analog1 = self.version     //takes whole numbers;
+        temperature = analog1;//send analog 1 inplace of temperature;
 		temperature = (temperature+60) * 256
 		packet33chars.push((temperature<<(sizeoftemperature-2*8))>>(sizeoftemperature-2*8)>>(1*8))
 		packet33chars.push((temperature<<(sizeoftemperature-1*8))>>(sizeoftemperature-1*8)>>(0*8))
@@ -301,7 +301,7 @@ class kcs_forwarder extends parser
 		packet33chars.push((digital2<<(sizeofdigital2-2*8))>>(sizeofdigital2-2*8)>>(1*8))
 		packet33chars.push((digital2<<(sizeofdigital2-1*8))>>(sizeofdigital2-1*8)>>(0*8))
 		//door status...2nd bit is door status
-		packet33chars.push(0x43)// or try 1 to make second bit zero
+		packet33chars.push(doorstatus)// or try 1 to make second bit zero
 		let singleitem = packet33chars.pop();
 		packet33chars.push(singleitem)
 		let singleitemsize = self.roughSizeOfObject(singleitem)

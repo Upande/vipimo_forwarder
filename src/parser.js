@@ -16,7 +16,8 @@ class parser
 	{
 		this.nodeMon = nodeMon
 	}
-	/*static*/ clear_vars()
+
+	clear_vars()
 	{
 		let self = this;
 		self.msg = null;
@@ -24,12 +25,13 @@ class parser
 		self.hexstring = null;
 		self.imei = null;
 	}
-	/*static*/ init(msg, info, callback)
+
+	init(msg, info, callback)
 	{
 		let msg2 = msg;
 		let self = this;
 		self.clear_vars();
-  	 	console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
+  	 	console.log('Received %d bytes from %s:%d',msg.length, info.address, info.port);
 		// console.log(msg);
 		let is_data;
 		try
@@ -50,41 +52,47 @@ class parser
 
 	}
 
-	/*static*/ sendsignalmsg(devArr)
+	sendsignalmsg(devArr)
 	{
 		
 		let self = this;
 		let kcsserver = config.get("/kcsserver");
-		//let gatewayIMEI = gatewayconfig.get("/IMEI");
-		//console.log(self.signalmsg)
 		self.signalmsg.rxpk[0]["gateway"] = gatewayconfig.get("/IMEI");
 		self.signalmsg.rxpk[0]["devaddr"] = devArr//self.devArr;
-		//console.log(self.signalmsg)
 		let strtosend = new Buffer(JSON.stringify(self.signalmsg)).toString('base64')
 		
 		Async.each(kcsserver, function(url, callback) {
 			url = url.replace("upload.php","uploadsignal.php");
 		    let sendto = url +strtosend;
-		    // console.log('Sending to  ' + sendto);
-
 		    request(sendto, function (error, response, body) {
-				console.log('from kcs signal:', body); // Print the HTML for the Google homepage. 
+
+		    	//
+		    	try
+		    	{
+		    		if(response.statusCode !== 200)
+					{
+						console.log(`from kcs signal: ${response.statusCode} `)
+						return callback()
+					}else console.log('from kcs signal:', body); 
+			    }catch(error)
+			    {
+			    	console.log('from kcs signal:', body);
+			    }
+		    	   
 				if(error)callback(error)
 				else callback()
 
 			});
 		}, function(err) {
-		    // if any of the file processing produced an error, err would equal that error
 		    if( err ) {
 		      console.log(' '+err);
 		    } else {
-		      // console.log('...');
 		    }
 		});
 
 	}
 
-	/*static*/ decode()
+	decode()
 	{
 		let self = this;
 
@@ -103,14 +111,15 @@ class parser
 		// decrypt payload
 		let AppSKey = new Buffer(config.get("/AppSKey"), 'hex');
 		// console.log("Decrypted='" + lora_packet.decrypt(packet, AppSKey, NwkSKey).toString() + "'");
-		let ind;
-		let savestr = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' });
-		// for(ind in packet._packet)
-			// savestr += `::::::${packet._packet[ind].toString('hex')}`
-
-		savestr += `::${self.devArr}::${self.msg}`
-		let cmd = `echo ${savestr} >> logs`
-		let child = shell.exec(cmd, {async:true, silent:true});  //0000008D 
+		
+		/*
+		 * save packets to logs
+		 */
+		// let ind;
+		// let savestr = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' });
+		// savestr += `::${self.devArr}::${self.msg}`
+		// let cmd = `echo ${savestr} >> logs`
+		// let child = shell.exec(cmd, {async:true, silent:true});  //0000008D 
 
 		let payload = lora_packet.decrypt(packet, AppSKey, NwkSKey);
 		let hexstring = payload.toString('hex');
@@ -189,22 +198,6 @@ class parser
 			tempfinal /= 0.0625;
 			tempfinal = Math.floor(tempfinal);
 			
-			// if(tempfinal < 0)
-			// 	console.log(`${tempfinal} .. to hex(from negative) -> ...${~tempfinal.toString(16)}`)
-			// else
-			// 	console.log(`${tempfinal} .. to hex -> ...${tempfinal.toString(16)}`)
-			// if(tempfinal < 0)
-			// {
-			// 	console.log(`was ${tempfinal}`)
-			// 	tempfinal = ~tempfinal.toString(16);
-			// 	console.log(`${tempfinal} .. to hex(from negative) `)
-			// }
-			// else
-			// {
-			// 	tempfinal = tempfinal.toString(16);
-			// 	console.log(`${tempfinal} from hex `)
-			// }
-			// console.log(`SOME TEMP: ${tempfinal}`);
 			tempfinal = self.twoscomplement(tempfinal)
 			tempfinal = tempfinal.toString(16);
 
@@ -272,7 +265,7 @@ class parser
 
 
 
-	/*static*/ getdevAddr(callback)
+	getdevAddr(callback)
 	{
 		let self = this;
 		// console.log(self.msg)
@@ -294,12 +287,29 @@ class parser
 		return callback(null, devArr);
 	}
 
+	async saveForLater(errcode, upStr, device)
+	{
+		switch(errcode)
+		{
+			case "ENETUNREACH":	
+			case "SERVERMISCONFIGURATION":	
+				let cmd = `echo "${upStr}" >> vipimo_${device}.logs`
+				let child = shell.exec(cmd, {async:true, silent:true});  //0000008D					
+				break;
+			default:
+				;
+		}
+		    
+	}
 
-	/*static*/ kcs_encode(callback)
+
+	kcs_encode(callback)
 	{
 		let self = this;
 		let hexstring = self.hexstring
 		let payload = self.payload;
+
+		// console.log(payload)
 		
 		if(payload[0] !== 0x24 && payload[0] !== 0x23)return callback("invalid payload received");
 
@@ -336,13 +346,20 @@ class parser
 		analog1 = (payload[13]<<8) + payload[14];
 		analog2 = (payload[16]<<8) + payload[17];
 		temperature = (payload[25]<<8) + payload[26];
-		vbat = (payload[28]<<8) + payload[27];
-		vbat *= 0.006406;
-
-		// analog1 = 4;
-		// temperature = 3;
+		try
+		{
+			let payloadlen = payload.length;
+			// console.log(`Payload length: ${payloadlen}`)
+			// payloadlen--;
+			console.log(payloadlen)
+			vbat = (payload[--payloadlen]<<8) + payload[--payloadlen];
+			console.log(payloadlen)
+		}catch(error)
+		{
+			vbat = (payload[28]<<8) + payload[27];
+		}
 		
-		
+		vbat *= 0.006406;		
 
 		/////////////////////////////////////////////////////////////////
 		//console.log(packet_bigEndian)
@@ -432,16 +449,10 @@ class parser
 		packet33chars.push(99)
 		 packetind = self.roughSizeOfObject(packet33chars)/singleitemsize-1
 		// console.log("packetind: "+packetind)
-		//console.log("packetind: "+packetind)
-		//let time go last
-		// console.log(packet33chars)
 		let packet33charsinverted = []
 		for(tmp=0;tmp<=packetind;tmp++)packet33charsinverted.push(packet33chars.pop())
-		// console.log(packet33chars)
 		let packetstr = 0;
 		let lastpacketlen = (8*packetind)/6
-
-		//console.log(packet33charsinverted)
 		let bitindex, byteindex;
 
 		let packetstosend = [];
@@ -486,38 +497,180 @@ class parser
 		    strtosend += c[ind]
 		}
 		strtosend = self.imei+"|"+strtosend;
-		// console.log(strtosend)
-
 		let kcsserver = config.get("/kcsserver");
 
 
+		let upStr = strtosend
+		let serverNotFound = []
+		let numServers =  Object.keys(kcsserver).length;
 		Async.each(kcsserver, function(url, callback) {
 
 		    let sendto = url +strtosend;
 		    console.log('Sending to  ' + sendto);
 
 		    request(sendto, function (error, response, body) {
-				// console.log("Sent to KCS")
-				console.log('from kcs:', body); // Print the HTML for the Google homepage. 
-				if(error)callback(error)
-				else callback()
+		    	try
+		    	{
+		    		if(response.statusCode !== 200)
+		    			serverNotFound.push(true)
+		    	}catch(error)
+		    	{
+		    		serverNotFound.push(true)
+		    	}
+		    	
+		    	if(numServers === serverNotFound.length)
+    				if(!error)error = {code:"SERVERMISCONFIGURATION"}
+				if(error)
+					return callback(error.code)
+				if(response.statusCode !== 200)
+				{
+					console.log(`from kcs: ${response.statusCode} `)
+					return callback()
+				}else console.log('from kcs:', body); 
+				// if(error)callback(error)
+				// else callback()
+				callback()
 
 			});
-		}, function(err) {
-		    // if any of the file processing produced an error, err would equal that error
-		    if( err ) {
-		      console.log(' '+err);
-		    } else {
-		      // console.log('...');
-		    }
+		}, function(errcode) {
+			self.saveForLater(errcode, upStr, "nodes");
 		});
-		
-
-
-		
 	}
 
-	/*static*/ DevAddrToFakeImei(DevAddr) {
+
+	callSendFromLogs(device)
+	{
+		let self = this
+		self.sendFromLogs(device, function(err, numLines){
+			if(numLines > 0)self.callSendFromLogs(device)
+		})
+	}
+	sendFromLogs(device, callback)
+	{
+		let self = this
+		/*
+		 *	delete leading lines and blank lines
+		 */
+		let delColonLines = `sed -i '/^:/ d' vipimo_${device}.logs && sed -i '/^$/d' vipimo_${device}.logs`	//delete lines begining with :
+		shell.exec(delColonLines, {async:true, silent:true});
+
+		let servers;
+		switch(device)
+		{
+			case "gateway":
+				servers = config.get("/gatewayendpoints/alive")
+				break;
+			case "nodes":
+				servers = config.get("/kcsserver")
+				break;
+			case "signal":
+				servers = config.get("/kcsserver")
+				break;
+			default:
+				servers = {};
+
+		}
+		let cmd = `wc -l vipimo_${device}.logs`
+		let child = shell.exec(cmd, {async:true, silent:true});
+		
+		let num_lines = 0;
+		let connectionError = false;
+		child.stdout.on('data', function(data) {
+			num_lines = parseInt(data.split(" ")[0])
+			// console.log(`num_lines: ${num_lines} for ${device}`)
+			if(num_lines === 0)return callback(null, num_lines)
+			let lines_array = [];
+			let read_lines = 10
+			let cmd1 = `sed -n '1p;2p;3p;4p;5p;6p;7p;8p;9p;10p;' vipimo_${device}.logs` 
+			let child1 = shell.exec(cmd1, {async:true, silent:true});
+			child1.stdout.on('data', function(data) {
+				let idata = data.replace(/[\r\n]/g, ':::::');
+				lines_array = idata.split(":::::");
+				lines_array = lines_array.slice(0,read_lines)
+				let deleted = new Array(read_lines+1).fill(false);
+				Async.each(Object.keys(lines_array), function (ind, next){ 
+					let log = lines_array[ind]
+					let ind_next = parseInt(ind)+1;
+					let serverNotFound = []
+					let numServers =  Object.keys(servers).length;
+					let upStr;
+		            Async.each(servers, function(url, next1) {
+		            	upStr = log
+					    let sendto = url +log;
+					    console.log(sendto)
+					    request(sendto, function (error, response, body) {
+					    	try
+					    	{
+					    		if(response.statusCode !== 200)
+					    		serverNotFound.push(true)
+						    }catch(error)
+						    {
+						    	serverNotFound.push(true)
+						    }
+					    	
+					    	if(numServers === serverNotFound.length)
+			    				if(!error)error = {code:"SERVERMISCONFIGURATION"}
+					    	if(error)
+					    	{
+					    		connectionError = true;
+					    		return next1(error.code)
+					    	}
+					    	if(deleted[ind_next] === false)
+					    	{
+					    		deleted[parseInt(ind)+1] = true
+					    		let cmd2 = `sed -n '${ind_next}p;' vipimo_${device}.logs`
+					    		let child2 = shell.exec(cmd2, {async:true, silent:true});
+					    		child2.stdout.on('data', function(line) {
+					    			let cmd3 = `find vipimo_${device}.logs -type f -exec  sed -i 's/${line.replace(/[\r\n]/g, '')}/:::::::/g' {} +`
+					    			// console.log(cmd3)
+					    			let child3 = shell.exec(cmd3, {async:true, silent:true});
+					    		});
+					    	}
+					    	
+					    	if(body === undefined) next1();
+							if(response.statusCode !== 200)
+							{
+								console.log(`from kcs statusCode: ${response.statusCode} `)
+								 next1()
+							}else console.log('from kcs:', body);  
+							if(device !== "gateway")next1()
+							else
+							{
+								let commands = body.match(/\+CLI(.)*/ig);
+								Async.each(commands, function(command, callback_inner) {
+									command = command.replace(/\+CLI([.]*)/ig, '$1');
+
+									let cmd = command;
+									console.log(cmd)
+									let child = shell.exec(cmd, {async:true, silent:true});
+									let calledback = false;
+									child.stdout.on('data', function(data) {
+										// console.log(data)
+										if(calledback === false) 
+											callback_inner();
+									});
+								});
+								
+								next1()
+							}
+
+						});
+
+					}, function(errcode) {
+						// console.log(`save for later ${upStr} ${device}`)
+						self.saveForLater(errcode, upStr, device);
+						next()
+					});
+	                
+	            }, function(err) {
+	            	callback(null, connectionError === false?1:0)
+	            }); 
+			});
+		});
+
+	}
+
+	DevAddrToFakeImei(DevAddr) {
 		var imei = "999", bits, digit;
 		if (!DevAddr.match(/^[0-9a-f]{8}$/i))
 			return ""; //Not 8 hexadecimal characters
@@ -537,7 +690,7 @@ class parser
 		return imei + ((10 - (c % 10)) % 10).toString(10);
 	}
 
-	/*static*/ roughSizeOfObject( object ) {
+	roughSizeOfObject( object ) {
 
 	    var objectList = [];
 	    var stack = [ object ];

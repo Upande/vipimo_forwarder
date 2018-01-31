@@ -91,7 +91,7 @@ class kcs_forwarder extends parser
 			    	{
 			    		if(body.length > 400)
 			    			if(!error)error = {code:"WRONGBODY"}
-			    	}catch(err){}
+			    	}catch(err){if(!error)error = {code:"WRONGBODY"} }
 			    	try
 			    	{
 			    		if(response.statusCode !== 200)

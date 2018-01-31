@@ -292,6 +292,7 @@ class parser
 		switch(errcode)
 		{
 			case "ENETUNREACH":	
+			case "ENOTFOUND":	
 			case "SERVERMISCONFIGURATION":	
 				let cmd = `echo "${upStr}" >> vipimo_${device}.logs`
 				let child = shell.exec(cmd, {async:true, silent:true});  //0000008D					

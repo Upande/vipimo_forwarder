@@ -11,7 +11,7 @@ numechecktimes=$((restarttime / checktime))
 
 function checkconnection(){
 	local isconnected=1
-	while ! ping -w 1 google.com > /dev/null 2>&1; do
+	while ! ping -w 1 8.8.8.8 > /dev/null 2>&1; do #how to ping if no internet but connection is available
 		isconnected=0
 	    break
 	done
@@ -62,9 +62,10 @@ do
    			echo CHECKED $numchecked of $numechecktimes
 
    			# if [ $numchecked > $numechecktimes ]; then
-   			if [ if [ "$numchecked" -ge "$numechecktimes" ] ]; then
+   			if [ "$numchecked" -ge "$numechecktimes" ]; then
    				echo "Restarting because of no internet"
-   				echo reboot	#reboot
+   				reboot
+   				# echo reboot	#reboot
    			fi
    		else
    			echo CHECKED $numchecked of $numechecktimes

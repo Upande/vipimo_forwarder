@@ -351,9 +351,9 @@ class parser
 			let payloadlen = payload.length;
 			// console.log(`Payload length: ${payloadlen}`)
 			// payloadlen--;
-			console.log(payloadlen)
+			// console.log(payloadlen)
 			vbat = (payload[--payloadlen]<<8) + payload[--payloadlen];
-			console.log(payloadlen)
+			// console.log(payloadlen)
 		}catch(error)
 		{
 			vbat = (payload[28]<<8) + payload[27];
@@ -551,7 +551,7 @@ class parser
 		/*
 		 *	delete leading lines and blank lines
 		 */
-		let delColonLines = `sed -i '/^:/ d' vipimo_${device}.logs && sed -i '/^$/d' vipimo_${device}.logs`	//delete lines begining with :
+		let delColonLines = `sed -i '/^:/ d' vipimo_${device}.logs && sed -i '/^$/d' vipimo_${device}.logs && sed -i -e '/^[^0-9]/d' vipimo_${device}.logs`	//delete lines begining with :
 		shell.exec(delColonLines, {async:true, silent:true});
 
 		let servers;

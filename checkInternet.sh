@@ -61,7 +61,8 @@ do
    			numchecked=$((numchecked + 1))
    			echo CHECKED $numchecked of $numechecktimes
 
-   			if [ $numchecked = $numechecktimes ]; then
+   			# if [ $numchecked > $numechecktimes ]; then
+   			if [ if [ "$numchecked" -ge "$numechecktimes" ] ]; then
    				echo "Restarting because of no internet"
    				echo reboot	#reboot
    			fi

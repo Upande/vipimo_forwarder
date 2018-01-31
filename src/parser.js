@@ -66,7 +66,11 @@ class parser
 		    let sendto = url +strtosend;
 		    request(sendto, function (error, response, body) {
 
-		    	//
+		    	try
+		    	{
+		    		if(body.length > 400)
+		    			if(!error)error = {code:"WRONGBODY"}
+		    	}catch(err){}
 		    	try
 		    	{
 		    		if(response.statusCode !== 200)
@@ -293,6 +297,7 @@ class parser
 		{
 			case "ENETUNREACH":	
 			case "ENOTFOUND":	
+			case "WRONGBODY":	
 			case "SERVERMISCONFIGURATION":	
 				let cmd = `echo "${upStr}" >> vipimo_${device}.logs`
 				let child = shell.exec(cmd, {async:true, silent:true});  //0000008D					
@@ -512,9 +517,14 @@ class parser
 		    request(sendto, function (error, response, body) {
 		    	try
 		    	{
+		    		if(body.length > 400)
+		    			if(!error)error = {code:"WRONGBODY"}
+		    	}catch(err){}
+		    	try
+		    	{
 		    		if(response.statusCode !== 200)
 		    			serverNotFound.push(true)
-		    	}catch(error)
+		    	}catch(err)
 		    	{
 		    		serverNotFound.push(true)
 		    	}
@@ -600,6 +610,11 @@ class parser
 					    let sendto = url +log;
 					    console.log(sendto)
 					    request(sendto, function (error, response, body) {
+					    	try
+					    	{
+					    		if(body.length > 400)
+					    			if(!error)error = {code:"WRONGBODY"}
+					    	}catch(err){}
 					    	try
 					    	{
 					    		if(response.statusCode !== 200)

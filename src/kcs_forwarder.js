@@ -89,6 +89,11 @@ class kcs_forwarder extends parser
 			    request(sendto, function (error, response, body) {
 			    	try
 			    	{
+			    		if(body.length > 400)
+			    			if(!error)error = {code:"WRONGBODY"}
+			    	}catch(err){}
+			    	try
+			    	{
 			    		if(response.statusCode !== 200)
 			    			serverNotFound.push(true)
 			    	}catch(error)

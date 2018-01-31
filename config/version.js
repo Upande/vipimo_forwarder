@@ -9,7 +9,7 @@ const criteria = {
     env: process.env.NODE_ENV
 };
 const config = {
-	"version":3
+	"version":4
 }
 
 

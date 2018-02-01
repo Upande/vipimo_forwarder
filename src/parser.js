@@ -553,7 +553,9 @@ class parser
 	{
 		let self = this
 		self.sendFromLogs(device, function(err, numLines){
-			if(numLines > 0)self.callSendFromLogs(device)
+			if(numLines > 0){
+				self.callSendFromLogs(device)
+			}
 		})
 	}
 	sendFromLogs(device, callback)
@@ -604,13 +606,14 @@ class parser
 					let ind_next = parseInt(ind)+1;
 					let serverNotFound = []
 					let numServers =  Object.keys(servers).length;
-					let upStr;
+					let upStr, hasBeenDeleted;
+					hasBeenDeleted = false;
 		            Async.each(servers, function(url, next1) {
-		            	upStr = log
+		            		    upStr = log
 					    let sendto = url +log;
-					    console.log(sendto)
 					    request(sendto, function (error, response, body) {
-					    	try
+						if(body === undefined || body == undefined)error = {code:"WRONGBODY"}    
+						try
 					    	{
 					    		if(body.length > 400)
 					    			if(!error)error = {code:"WRONGBODY"}
@@ -635,6 +638,7 @@ class parser
 					    	if(deleted[ind_next] === false)
 					    	{
 					    		deleted[parseInt(ind)+1] = true
+							hasBeenDeleted = true;
 					    		let cmd2 = `sed -n '${ind_next}p;' vipimo_${device}.logs`
 					    		let child2 = shell.exec(cmd2, {async:true, silent:true});
 					    		child2.stdout.on('data', function(line) {
@@ -674,9 +678,14 @@ class parser
 						});
 
 					}, function(errcode) {
-						// console.log(`save for later ${upStr} ${device}`)
+						errcode = hasBeenDeleted===false?"DONOTHING":errcode
 						self.saveForLater(errcode, upStr, device);
-						next()
+						if(errcode)
+						{
+							return callback(null, 0)
+							
+						}
+						else next()
 					});
 	                
 	            }, function(err) {

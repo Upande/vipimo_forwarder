@@ -75,16 +75,17 @@ server.on('close',function(){
 });
 
 
-// kcs_forwarder.callSendFromLogs("gateway");
-// kcs_forwarder.callSendFromLogs("nodes");
+kcs_forwarder.callSendFromLogs("gateway");
+kcs_forwarder.callSendFromLogs("nodes");
+kcs_forwarder.gatewayreports(function(err,result){});
 //wait for system to sync time
 setTimeout(function(){
   server.bind(process.env.PORT);
 
   //send a message to server from gateway after one hour
-  kcs_forwarder.gatewayreports(function(err,result){});
-  kcs_forwarder.callSendFromLogs("gateway");
-  kcs_forwarder.callSendFromLogs("nodes");
+  //kcs_forwarder.gatewayreports(function(err,result){});
+  //kcs_forwarder.callSendFromLogs("gateway");
+  //kcs_forwarder.callSendFromLogs("nodes");
 
   setInterval(function() { 
     kcs_forwarder.gatewayreports(function(err,result){});
@@ -93,8 +94,8 @@ setTimeout(function(){
   setInterval(function() { 
     kcs_forwarder.callSendFromLogs("gateway");
     kcs_forwarder.callSendFromLogs("nodes");
-  }, config.get('/intervals/sendfromlogs') || 1200);
-  // }, config.get('/intervals/sendfromlogs') || 120000);
+  //}, config.get('/intervals/sendfromlogs') || 1200);
+   }, config.get('/intervals/sendfromlogs') || 120000);
 
 
   setInterval(function() { 

@@ -2,7 +2,7 @@
 
 
 checktime=2	 #time in minutes after which to check for connection
-restarttime=10 #time after which to restart if no connection
+restarttime=12 #time after which to restart if no connection
 
 #times in seconds
 checktime=$((checktime * 60))

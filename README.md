@@ -112,9 +112,6 @@ tail -f /var/log/syslog |grep kcs_forwarder
 ```
 
 ## Features
-- [x] Forward to ttn or similar server
-- [x] Forward to KCS or similar server
-- [x] Forward to multiple servers
 - [x] Remote change of configurations
 - [x] Automatic updates
 - [x] Remote running of commands
@@ -122,6 +119,16 @@ tail -f /var/log/syslog |grep kcs_forwarder
 - [x] Gateway uptime and script uptime
 - [x] Signal strength
 - [x] SSH Reverse tunneling
+- [x] Saving device logs if no internet
+- [x] Restarting if no internet, depending on device type
+
+## Redo
+- [x] Forward to ttn or similar server
+- [x] Forward to KCS or similar server
+- [x] Forward to multiple servers
+
+## Confirm
+- [x] Reverse tunneling
 
 ## Todo
 - [ ] Registering gateway
@@ -129,8 +136,6 @@ tail -f /var/log/syslog |grep kcs_forwarder
 - [ ] Add more data formats (of received payload)
 - [ ] Allow different decoding credentials(Netkey & AppKey) for different devices
 - [ ] Analyzing logs
-- [ ] Restarting if no internet, depending on device type
-- [ ] Saving device logs if no internet
 - [ ] Signal strength and battery together
 - [ ] Count the number of nodes(All nodes vs nodes within a given time period)
   - [x] All nodes
@@ -141,10 +146,8 @@ tail -f /var/log/syslog |grep kcs_forwarder
   - [ ] Nodes
   - [ ] Values
   - [ ] Signals
-- [3] Reverse tunneling
 - [ ] Analyzing logs
 - [2] Restarting if no internet, depending on device type
-- [1] Saving device logs if no internet
 - [ ] Signal strength and battery together
 - [0] Count the number of nodes(All nodes vs nodes within a given time period)
-
+- [0] DB sync

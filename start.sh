@@ -32,7 +32,7 @@ gitpull()
 	{
 	if [ $ENVIRONMENT = 'dev' ]; then
 		{ # try
-	    	git pull origin dev1
+	    	git pull origin devfeb
 		} || { # catch
 			failedtopull=1
 		}
@@ -85,6 +85,7 @@ vipimotunnel()
 	{ #try
 		someport=2"$SHORTIMEI"
 		#ssh  -f -o StrictHostKeyChecking=no -i resources/vipimo.pem -R $someport:localhost:22 -N vipimo@vipimo.co.ke
+		killall checkInternet.sh #any running from previous service
 		./checkInternet.sh $someport &
 	} || { #catch
 		#do nothing really

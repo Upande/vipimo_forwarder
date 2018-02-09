@@ -18,6 +18,21 @@ function checkconnection(){
 	echo $isconnected
 }
 
+function connectionCameBack? () {
+	STARTTIME=$SECONDS
+	while ! ping -w 1 8.8.8.8 > /dev/null 2>&1; do #how to ping if no internet but connection is available
+		isconnected=0
+		elapsed=$(($SECONDS - $STARTTIME))
+		[[ $elapsed -ge $restarttime ]] && break
+		echo "Elapsed $elapsed of $restarttime"
+	    # break #break only if net comes back or if time elapses
+	done
+	ping -w 1 8.8.8.8 > /dev/null 2>&1 && {
+		isconnected=1
+	}
+	echo $isconnected
+}
+
 function setdate()
 {
 	date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
@@ -60,19 +75,22 @@ do
    		if [ $connection = 0 ] ; then
    			numchecked=$((numchecked + 1))
    			echo CHECKED $numchecked of $numechecktimes
-
-   			# if [ $numchecked > $numechecktimes ]; then
-   			if [ "$numchecked" -ge "$numechecktimes" ] ; then
+   			#wait for connection to come back
+   			connectionCameBack?
+   			connection=$(checkconnection)
+   			echo $connection
+   			[[ 1 -gt $connection ]] && {	#still no connection
    				echo "Restarting because of no internet"
    				reboot
-   				# echo reboot	#reboot
-   			fi
+   				# try reseting USB Modem instead of rebooting
+   			} 
+   			sleep 2
    		else
    			echo CHECKED $numchecked of $numechecktimes
    			numchecked=0
    			reversetunnel $1
    			setdate
+   			sleep $checktime
    		fi
-   		sleep $checktime
    }
 done

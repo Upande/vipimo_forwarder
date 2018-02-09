@@ -23,8 +23,9 @@ function connectionCameBack? () {
 	while ! ping -w 1 8.8.8.8 > /dev/null 2>&1; do #how to ping if no internet but connection is available
 		isconnected=0
 		elapsed=$(($SECONDS - $STARTTIME))
+		[[ $elapsed -ge 120 ]] && usb_modeswitch -v 0x7392 -p 0x7811 --reset-usb #try reseting modem
 		[[ $elapsed -ge $restarttime ]] && break
-		echo "Elapsed $elapsed of $restarttime"
+		# echo "Elapsed $elapsed of $restarttime"
 	    # break #break only if net comes back or if time elapses
 	done
 	ping -w 1 8.8.8.8 > /dev/null 2>&1 && {

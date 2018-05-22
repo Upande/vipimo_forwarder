@@ -36,7 +36,13 @@ function connectionCameBack? () {
 
 function setdate()
 {
-	date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+	SETTING="$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+    if [ "$SETTING" = "Z" ]; then
+        hwclock -s #set systemtime from hardware clock
+    else
+        date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+        hwclock -w #set the hardware clock from the current system time
+    fi
 }
 
 function reversetunnel(){

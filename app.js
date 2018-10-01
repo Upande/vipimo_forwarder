@@ -39,10 +39,12 @@ server.on('message',function(msg_in,info){
         {
           kcs_forwarder.getdevAddr(function(err, devAddr){
             console.log(devAddr)
-            if(devAddr === '0702D663'||devAddr === '0702A342'|| devAddr === '0A03F8E4'
+            if(devAddr[0] === '0')
+           /* if(devAddr === '0702D663'||devAddr === '0702A342'|| devAddr === '0A03F8E4'
               || devAddr === '0802C474'|| devAddr === '0A03F9E4'|| devAddr === '0602ED46'|| 
               devAddr === '0902C767'||devAddr === '0902B341'|| devAddr === '0702A44D' || 
               devAddr === '0702B549' || devAddr === '0702D272')
+            */
             {
               kcs_forwarder.decodev1();
               kcs_forwarder.sendsignalmsg(devAddr);

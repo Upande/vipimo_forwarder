@@ -1,13 +1,13 @@
-const lora_packet = require('lora-packet');
-const config = require('../config/config');
-const request = require('request');
-const Async = require('async');
-const gatewayconfig = require('../config/gatewayconfig');
-//const Encoder = require('node-html-encoder').Encoder;
-//const encoder = new Encoder('entity');
-let nodeMon = require("./nodeMonitor")
-const bitwise = require('bitwise');
-const shell = require('shelljs');
+const lora_packet = require('lora-packet'),
+	config = require('../config/config'),
+	request = require('request'),
+	Async = require('async'),
+	gatewayconfig = require('../config/gatewayconfig'),
+	nodeMon = require("./nodeMonitor"),
+	bitwise = require('bitwise'),
+	shell = require('shelljs'),
+	to = require('await-to-js'),
+ 	{ StringDecoder } = require('string_decoder');
 
 
 class parser
@@ -26,13 +26,45 @@ class parser
 		self.imei = null;
 	}
 
+	async msgType(msg_in)
+	{
+		let decoder = new StringDecoder('utf8');
+		let protocolversion = parseInt(Buffer.from(msg_in.slice(0, 1)).readUIntBE(0, 1));
+		let randomtoken = Buffer.from(msg_in.slice(1, 3)).toString('hex');
+		let identifier = Buffer.from(msg_in.slice(3, 4)).toString('hex');
+		let MACaddress = Buffer.from(msg_in.slice(4, 12)).toString('hex');
+		let msg = decoder.write(Buffer.from(msg_in.slice(12, msg_in.length)));
+		let tmpmsg;
+		try
+		{
+			tmpmsg = JSON.parse(msg);
+		}catch(err)
+		{
+			tmpmsg = {};
+		}
+		let msgType;
+		let msgTypes = {};
+		for(msgType in tmpmsg)msgTypes[msgType] = msgType;
+		msgType = Object.keys(msgTypes).join(",")	 || "PULL rq"
+		return {
+			protocol:protocolversion,
+			token:randomtoken,
+			identifier:identifier,
+			MAC:MACaddress,
+			stat:tmpmsg.stat || false,
+			rxpk:tmpmsg.rxpk || false,
+			txpk_ack:tmpmsg.txpk_ack ||false,
+			msgType:msgType
+		};
+	}
+
 	init(msg, info, callback)
 	{
 		let msg2 = msg;
 		let self = this;
 		self.clear_vars();
   	 	console.log('Received %d bytes from %s:%d',msg.length, info.address, info.port);
-		// console.log(msg);
+		console.log(msg);
 		let is_data;
 		try
 		{
@@ -60,6 +92,9 @@ class parser
 		self.signalmsg.rxpk[0]["gateway"] = gatewayconfig.get("/IMEI");
 		self.signalmsg.rxpk[0]["devaddr"] = devArr//self.devArr;
 		let strtosend = new Buffer(JSON.stringify(self.signalmsg)).toString('base64')
+
+
+		
 		
 		Async.each(kcsserver, function(url, callback) {
 			url = url.replace("upload.php","uploadsignal.php");
@@ -94,6 +129,52 @@ class parser
 		    }
 		});
 
+	}
+
+	decodev2(options)
+	{
+		let self = this;
+
+		let msg = options.data;
+		let NwkSKey  = options.NwkSKey
+		let AppSKey  = options.AppSKey
+		console.log(options)
+
+		console.log(msg)
+		var packet = lora_packet.fromWire(new Buffer(msg, 'base64'));
+
+		let devArr = self.devArr
+		
+		// check MIC
+		NwkSKey = new Buffer(NwkSKey, 'hex');
+
+		// decrypt payload
+		AppSKey = new Buffer(AppSKey, 'hex');
+		// console.log("Decrypted='" + lora_packet.decrypt(packet, AppSKey, NwkSKey).toString() + "'");
+		
+		/*
+		 * save packets to logs
+		 */
+		// let ind;
+		// let savestr = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' });
+		// savestr += `::${self.devArr}::${self.msg}`
+		// let cmd = `echo ${savestr} >> logs`
+		// let child = shell.exec(cmd, {async:true, silent:true});  //0000008D 
+
+		let payload = lora_packet.decrypt(packet, AppSKey, NwkSKey);
+		let hexstring = payload.toString('hex');
+		console.log('in decodev1')
+		console.log(hexstring)
+		let frameCounter = packet.getFCnt();
+		console.log(frameCounter)
+		// let imei = self.DevAddrToFakeImei(devArr)
+		// self.imei = imei;
+		// self.payload = payload;
+		// self.hexstring = hexstring;
+
+		// self.kcs_encode(function(err, result){
+		// 	if(err)return;
+		// })
 	}
 
 	decode()
@@ -136,6 +217,8 @@ class parser
 			if(err)return;
 		})
 	}
+
+
 
 	completehex(hex, reqlen = 0)
 	{
@@ -269,12 +352,12 @@ class parser
 
 
 
-	getdevAddr(callback)
+	async getdevAddr(msg)
 	{
 		let self = this;
 		// console.log(self.msg)
-		var packet = lora_packet.fromWire(new Buffer(self.msg, 'base64'));
-		let msg = packet.toString();
+		var packet = lora_packet.fromWire(new Buffer(msg, 'base64'));
+		msg = packet.toString();
 		let devArr;
 		try
 		{
@@ -284,11 +367,12 @@ class parser
 		}catch(error)
 		{
 		 	console.log(error)
-		 	return false;
+		 	throw error;
+		 	// return false;
 		}
 		self.devArr = devArr
-		nodeMon.addNode(devArr)
-		return callback(null, devArr);
+		// nodeMon.addNode(devArr)
+		return devArr;
 	}
 
 	async saveForLater(errcode, upStr, device)

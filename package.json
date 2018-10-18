@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "await-to-js": "^2.0.1",
+    "axios": "^0.18.0",
     "bitwise": "^0.2.0",
     "confidence": "^3.0.2",
     "cuint": "^0.2.2",
@@ -21,7 +23,7 @@
     "lora-packet": "^0.6.0",
     "node-bitarray": "^0.1.0",
     "node-html-encoder": "^0.0.2",
-    "request": "^2.81.0",
+    "request": "^2.88.0",
     "shelljs": "^0.7.8",
     "string_decoder": "^1.0.3"
   }

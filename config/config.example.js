@@ -9,31 +9,32 @@ const criteria = {
     env: process.env.NODE_ENV
 };
 
+
 const config = {
-	"kcsserver":{
-		0:"",
-		1:""
-	},
-	"gatewayendpoints":
-	{
-		"alive":
-		{
-			0:"",
-			1:"",
-		},
-		"update":
-		{
-			0:"",
-			1:"",
-		}
-	},
-	"AppSKey":"",
-	"NwkSKey":"",
-	"intervals":{
-		"gatewayalive":3600000,		//one hour
-		"checkupdates":3600000,		//one hour
-		"restartservice":180000,		//3 minutes
-	}
+        "kcsserver":
+                {
+                },
+        "vipimoserver":
+                [
+                ],
+        "gatewayendpoints":
+        {
+                "alive":
+                {
+                },
+                "update":
+                {
+                },
+                "v2": [
+                ]
+        },
+        "AppSKey":"",
+        "NwkSKey":"",
+        "intervals":{
+                "gatewayalive":600000,          //one hour///3600000
+                "checkupdates":3600000,         //one hour
+                "restartservice":180000,                //3 minutes
+        }
 }
 
 

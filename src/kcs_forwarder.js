@@ -6,19 +6,21 @@ const gatewayconfig = require('../config/gatewayconfig');
 const request = require('request');
 const parser = require('./parser.js');
 const shell = require('shelljs');
-const Async = require('async');
+const Async = require('async'),
+{ StringDecoder } = require('string_decoder'),
+decoder = new StringDecoder('utf8'),
+to = require('await-to-js').to,
+axios = require('axios');
 
 
 class kcs_forwarder extends parser
 {
-	constructor()
-	{
+	constructor() {
 		super()
 		let self = this;
 		self.version = version.get("/version")
 	}
-	updates()
-	{
+	updates() {
 		let self= this;
 		self.checkforupdates(function(err, updated){
 			if(err)return;
@@ -49,7 +51,7 @@ class kcs_forwarder extends parser
 	}
 
 
-	gatewayuptime(callback)
+	async gatewayuptime()
 	{
 		try
 		{
@@ -58,14 +60,17 @@ class kcs_forwarder extends parser
 			let calledback = false;
 			let minutes = 0;
 			let hours = 0;
-			child.stdout.on('data', function(data) {
-				let tmp = data.split(" ")[0]
-				minutes = parseInt(tmp/60)
-				callback(null, minutes)
+			return new Promise(function(resolve, reject) {
+				child.stdout.on('data', function(data) {
+					let tmp = data.split(" ")[0]
+					minutes = parseInt(tmp/60)
+					resolve(minutes);
+				});
 			});
 		}catch(err)
 		{
-			callback(err, 0)
+			console.log(err)
+			return 0;
 		}
 		
 	}
@@ -185,7 +190,6 @@ class kcs_forwarder extends parser
 	}
 
 	roughSizeOfObject( object ) {
-
 	    let objectList = [];
 	    let stack = [ object ];
 	    let bytes = 0;
@@ -218,6 +222,192 @@ class kcs_forwarder extends parser
 	    }
 	    return bytes;
 	}
+
+
+	createEmptyPacket(identifier, options)
+	{
+		let protocolversion =  Buffer.from([options.protocol]);
+        let token = new Buffer(options.token, 'hex');
+        identifier = new Buffer(identifier, 'hex');
+        let arr = [protocolversion,token, identifier];
+        let totalLength = protocolversion.length+ token.length+identifier.length;
+        let buff = Buffer.concat([protocolversion,token, identifier], totalLength);
+        return buff;
+	}
+
+	pushAckPacket(options)
+	{
+  		let self = this;
+  		return self.createEmptyPacket("01", options)
+    }
+
+    pullAckPacket(options)
+	{
+		let self = this;
+  		return self.createEmptyPacket("04", options)
+    }
+
+    getJSONfromPacket(msg_in) {
+		let msg = msg_in.slice(12, msg_in.length)
+		msg = Buffer.from(msg);
+		msg = decoder.write(msg);
+
+		let ret = {};
+
+		try
+		{
+			ret = JSON.parse(msg)
+		}catch(error){}
+		return ret;
+
+    }
+
+    async makeRequest(sendto, params){
+		return new Promise(function(resolve, reject) {
+			console.log(sendto)
+			console.log(params)
+		    request(sendto, function (error, response, body) {
+		    	console.log(body)
+		    	console.log(error)
+		    	try
+		    	{
+		    		if(body.length > 400)
+		    			if(!error)error = {code:"WRONGBODY"}
+		    	}catch(err){}
+		    	try
+		    	{
+		    		if(response.statusCode !== 200)
+		    			return reject("NO SERVER")
+		    	}catch(err)
+		    	{
+		    		return reject("NO SERVER")
+		    	}
+		    	
+		    	// if(numServers === serverNotFound.length)
+    			// 	if(!error)error = {code:"SERVERMISCONFIGURATION"}
+				if(error)
+					return reject(error.code)
+				if(response.statusCode !== 200)
+				{
+					return reject(response.statusCode)
+				}else console.log('from kcs:', body); 
+				resolve(true)
+
+			});
+		});
+	}
+
+	async postRequest(sendto, params){
+		return new Promise(function(resolve, reject) {
+			// console.log(sendto)
+			// console.log(params)
+		    axios.post(sendto, params)
+			.then(function (response) {
+				return resolve(response);
+			})
+			.catch(function (error) {
+				return reject(error);
+			});
+		});
+	}
+
+    async sendGatewayStats(MAC) {
+    	let self = this
+    	// console.log("Sending gateway stats");
+    	let scriptUptime = Math.floor(process.uptime()/60)
+		let gatewayUptime = await self.gatewayuptime();
+		// let strUp = self.kcsstringWithCorrectTime(scriptUptime, gatewayUptime,nodeCount)
+
+		// upStr = gatewayIMEI+"|"+strUp
+		// let sendto = url +gatewayIMEI+"|"+strUp;
+		// console.log(`MAC: ${MAC}`)
+		// console.log(`MAC: ${scriptUptime}`)
+		// console.log(`MAC: ${gatewayUptime}`)
+
+		let gatewayserver = config.get("/gatewayendpoints/v2");
+		console.log(gatewayserver)
+		for(let i in gatewayserver) {
+			let server = gatewayserver[i];
+			let url = `${server}/${MAC}/` 
+			gatewayserver[i] = url
+		}
+		
+		
+		// let promises = gatewayserver.map(self.makeRequest);
+		// let promises = gatewayserver.map(x => self.makeRequest(x, {params:"paras"}));
+		let promises = gatewayserver.map(x => self.postRequest(x, {gup:gatewayUptime, sup:scriptUptime}));
+    	let [err, care] = await to(Promise.all(promises));
+    	// console.log(care)
+    	// console.log(err)
+    	return [err, care];
+
+    }
+
+    async pushedPacket(jsonMsg, MAC) {
+    	let self = this;
+    	// console.log(jsonMsg)
+  //   	if(jsonMsg.stat) {
+		// 	self.sendGatewayStats(MAC);
+		// 	return;
+		// }
+		if(jsonMsg.rxpk) {
+			console.log('is rxpk, invoke forwarders');
+			console.log(jsonMsg.rxpk)
+			
+			let i = 0;
+			async function singleNode(msg) {
+				// let msg = jsonMsg.rxpk[i];
+				let data = msg.data;
+				let rssi = msg.rrsi;
+				let datr = msg.datr;
+				let freq = msg.freq;
+				let [err, care] = await to(self.getdevAddr(data))
+				if(err) throw err;
+				let devAddr = care;
+				await self.nodeMon.getNodeCredentials(devAddr)
+
+				let thisNodeCredentials = self.nodeMon.nodes[devAddr]
+				if (Object.keys(thisNodeCredentials).length === 0) {
+					/*
+					 * handle unregistered nodes here...
+					 */
+					 return;
+				}
+				console.log(thisNodeCredentials)
+				let {Activation, NwkSKey, AppSKey, NodeEncoding, NodeType} =  thisNodeCredentials;
+				NodeEncoding = NodeEncoding.Encoding;
+				NodeType = NodeType.Type;
+				console.log({Activation, NwkSKey, AppSKey, NodeEncoding, NodeType})
+				if(Activation !== 'ABP') // this should already have been handled by the lack of a devAddr
+				{
+
+					return;
+				}
+				self.decodev2({Activation, NwkSKey, AppSKey, NodeEncoding, NodeType, data})
+
+				return;
+			}
+
+			let promises = jsonMsg.rxpk.map(singleNode);
+			let [err, care] = await to(Promise.all(promises));
+			if(err) throw err;
+			if(err)
+				throw err;
+			return
+			
+		} else 
+		// if(jsonMsg.stat) 
+		{
+			self.sendGatewayStats(MAC);
+			return;
+		}
+
+    }
+
+   
+    async getNodeKeys() { // 
+
+    }
 
 	kcsstringWithCorrectTime(scriptUptime, gatewayUptime, nodeCount, connectionAvailable = true)
 	{

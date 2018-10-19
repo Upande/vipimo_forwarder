@@ -6,7 +6,7 @@ const lora_packet = require('lora-packet'),
 	nodeMon = require("./nodeMonitor"),
 	bitwise = require('bitwise'),
 	shell = require('shelljs'),
-	to = require('await-to-js'),
+	to = require('await-to-js').to,
  	{ StringDecoder } = require('string_decoder');
 
 
@@ -131,16 +131,19 @@ class parser
 
 	}
 
-	decodev2(options)
+	async decodev2(options)
 	{
 		let self = this;
 
 		let msg = options.data;
 		let NwkSKey  = options.NwkSKey
 		let AppSKey  = options.AppSKey
-		console.log(options)
+		let NodeType = options.NodeType
+		let NodeEncoding = options.NodeEncoding.toLowerCase()
 
-		console.log(msg)
+		// console.log(options)
+
+		// console.log(msg)
 		var packet = lora_packet.fromWire(new Buffer(msg, 'base64'));
 
 		let devArr = self.devArr
@@ -150,23 +153,25 @@ class parser
 
 		// decrypt payload
 		AppSKey = new Buffer(AppSKey, 'hex');
-		// console.log("Decrypted='" + lora_packet.decrypt(packet, AppSKey, NwkSKey).toString() + "'");
-		
-		/*
-		 * save packets to logs
-		 */
-		// let ind;
-		// let savestr = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' });
-		// savestr += `::${self.devArr}::${self.msg}`
-		// let cmd = `echo ${savestr} >> logs`
-		// let child = shell.exec(cmd, {async:true, silent:true});  //0000008D 
-
 		let payload = lora_packet.decrypt(packet, AppSKey, NwkSKey);
 		let hexstring = payload.toString('hex');
-		console.log('in decodev1')
-		console.log(hexstring)
-		let frameCounter = packet.getFCnt();
-		console.log(frameCounter)
+		// console.log('in decodev1')
+		// console.log(hexstring)
+		let FrameCounter = packet.getFCnt();
+		// console.log(FrameCounter)
+		options.hexstring = hexstring
+		options.payload = payload
+
+		let decoder = require(__dirname+"/decoders/"+NodeEncoding)
+		decoder.addOptions(options)
+		let [err, care] = await to(decoder.decode());
+
+		if(err) throw err
+		care.FrameCounter = FrameCounter
+		// care.Data = FrameCounter
+		// let 
+
+		return care
 		// let imei = self.DevAddrToFakeImei(devArr)
 		// self.imei = imei;
 		// self.payload = payload;
@@ -177,7 +182,7 @@ class parser
 		// })
 	}
 
-	decode()
+	async decode()
 	{
 		let self = this;
 
@@ -348,9 +353,6 @@ class parser
 
 		}
 	}
-
-
-
 
 	async getdevAddr(msg)
 	{

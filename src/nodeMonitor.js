@@ -35,12 +35,13 @@ class NodeMonitor
     			if(self.nodes[nodeAddr])
     				return resolve(self.nodes[nodeAddr]);
 
-    			let url = `${server}/${nodeAddr}`
+    			let url = `${server}/node/${nodeAddr}`
     			console.log(url)
     			axios.get(url)
 				.then(function (response) {
 					if(response.data) {
-						self.nodes[nodeAddr] = response.data
+						if(Object.keys(response.data).length > 0) // != {}
+							self.nodes[nodeAddr] = response.data
 					}
 					return resolve(response);
 				})

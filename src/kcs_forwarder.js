@@ -351,29 +351,57 @@ class kcs_forwarder extends parser
 		// 	return;
 		// }
 		if(jsonMsg.rxpk) {
-			console.log('is rxpk, invoke forwarders');
-			console.log(jsonMsg.rxpk)
+			// console.log('is rxpk, invoke forwarders');
+			// console.log(jsonMsg.rxpk)
 			
 			let i = 0;
 			async function singleNode(msg) {
 				// let msg = jsonMsg.rxpk[i];
 				let data = msg.data;
-				let rssi = msg.rrsi;
+				let rssi = msg.rssi;
 				let datr = msg.datr;
-				let freq = msg.freq;
+				let snr = msg.lsnr;
+				let tmp = msg.datr.split('BW')
+				let sf = tmp[0].split('SF')[1]
+				let bandwidth = tmp[1]
+				let frequency = msg.freq;
 				let [err, care] = await to(self.getdevAddr(data))
 				if(err) throw err;
 				let devAddr = care;
 				await self.nodeMon.getNodeCredentials(devAddr)
 
 				let thisNodeCredentials = self.nodeMon.nodes[devAddr]
+				// console.log('credentials...')
+				// console.log(thisNodeCredentials)
 				if (Object.keys(thisNodeCredentials).length === 0) {
 					/*
 					 * handle unregistered nodes here...
 					 */
+					 let pushdata = {
+					 	mac:MAC,
+					 	data,
+					 	rssi,
+					 	snr,
+					 	frequency,
+					 	bandwidth,
+					 	sf
+					 }
+					 // console.log(pushdata)
+					let gatewayserver = config.get("/gatewayendpoints/v2");
+					let vipimoServers = config.get("/vipimoserver");
+
+					for(let i in vipimoServers) {
+						vipimoServers[i] = `${vipimoServers[i]}/unregisterednode/${devAddr}`
+					}
+					// console.log(vipimoServers)
+					
+					let promises = vipimoServers.map(x => self.postRequest(x, pushdata));
+			    	let [err, care] = await to(Promise.all(promises));
+			    	// console.log(care)
+			    	// console.log(err)
 					 return;
 				}
-				console.log(thisNodeCredentials)
+				// console.log(thisNodeCredentials)
 				let {Activation, NwkSKey, AppSKey, NodeEncoding, NodeType} =  thisNodeCredentials;
 				NodeEncoding = NodeEncoding.Encoding;
 				NodeType = NodeType.Type;
@@ -383,7 +411,45 @@ class kcs_forwarder extends parser
 
 					return;
 				}
-				self.decodev2({Activation, NwkSKey, AppSKey, NodeEncoding, NodeType, data})
+				;[err, care] = await to(self.decodev2({Activation, NwkSKey, AppSKey, NodeEncoding, NodeType, data}))
+				if(err) throw err
+
+				care.mac=MAC
+				care.rssi= rssi
+				care.snr= rssi
+				care.frequency= frequency
+				care.bandwidth= bandwidth
+				care.sf= sf
+				let pushdata = care;
+
+				console.log(devAddr)
+				console.log(care)
+
+				let gatewayserver = config.get("/gatewayendpoints/v2");
+				let vipimoServers = config.get("/vipimoserver");
+
+				for(let i in vipimoServers) {
+					vipimoServers[i] = `${vipimoServers[i]}/nodedata/${devAddr}`
+				}
+				// console.log(vipimoServers)
+				
+				let promises = vipimoServers.map(x => self.postRequest(x, pushdata));
+		    	;[err, care] = await to(Promise.all(promises));
+		    	// console.log(care)
+		    	// console.log(err)
+				 return;
+
+				/*
+				let pushdata = {
+					 	mac:MAC,
+					 	data,
+					 	rssi,
+					 	snr,
+					 	frequency,
+					 	bandwidth,
+					 	sf
+					 }
+					 */
 
 				return;
 			}

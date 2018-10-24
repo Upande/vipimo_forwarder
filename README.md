@@ -151,3 +151,9 @@ tail -f /var/log/syslog |grep kcs_forwarder
 - [ ] Signal strength and battery together
 - [0] Count the number of nodes(All nodes vs nodes within a given time period)
 - [0] DB sync
+
+
+## issues
+Temperature of humidity sensor is signed.
+
+Add differential pressure sensor

@@ -43,7 +43,7 @@ server.on('message', async function(msg_in,info){
       packet = kcs_forwarder.pushAckPacket(results);
       server.send(packet, info.port, info.address);
       jsonMsg = kcs_forwarder.getJSONfromPacket(msg_in);
-      kcs_forwarder.pushedPacket(jsonMsg, results.MAC)
+      [err,results] = await to(kcs_forwarder.pushedPacket(jsonMsg, results.MAC))
       break;
     case 2:               // PULL_DATA identifier 0x02
       packet = kcs_forwarder.pullAckPacket(results);

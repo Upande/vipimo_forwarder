@@ -372,7 +372,9 @@ class kcs_forwarder extends parser
 
 				let thisNodeCredentials = self.nodeMon.nodes[devAddr]
 				// console.log('credentials...')
-				// console.log(thisNodeCredentials)
+				console.log(`NodeAddr: ${devAddr}`)
+				thisNodeCredentials = thisNodeCredentials || {};
+				console.log(thisNodeCredentials)
 				if (Object.keys(thisNodeCredentials).length === 0) {
 					/*
 					 * handle unregistered nodes here...

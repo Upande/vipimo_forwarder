@@ -16,6 +16,7 @@ const config = {
                 },
         "vipimoserver":
                 [
+                "http://localhost:8799/api/vipimo"
                 ],
         "gatewayendpoints":
         {
@@ -26,6 +27,7 @@ const config = {
                 {
                 },
                 "v2": [
+                "http://localhost:8799/api/vipimo/gateway"
                 ]
         },
         "AppSKey":"",

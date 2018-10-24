@@ -1,0 +1,14 @@
+[Unit]
+Description=Vipimo forwarder
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/root/vipimo_forwarder/
+ExecStart=/root/vipimo_forwarder/start.sh
+SyslogIdentifier=vipimo_forwarder
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

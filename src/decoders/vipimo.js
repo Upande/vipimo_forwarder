@@ -1,6 +1,6 @@
 const decoder = require('./decoders.js');
 
-class bovedecoder extends decoder{
+class vipimodecoder extends decoder{
 	constructor()
 	{
 		super();
@@ -65,13 +65,13 @@ class bovedecoder extends decoder{
 		let numAnalog = parseInt(statusbits[3]+statusbits[4], 2);
 		let numTemperature = parseInt(statusbits[0]+statusbits[1], 2); // other temperatures apart from box temperature
 
-		console.log(nodeNumber)
-		console.log(statusbits)
-		console.log(isBattery)
-		console.log(isInternalTemperature)
-		console.log(numDigital)
-		console.log(numAnalog)
-		console.log(numTemperature)
+		// console.log(nodeNumber)
+		// console.log(statusbits)
+		// console.log(isBattery)
+		// console.log(isInternalTemperature)
+		// console.log(numDigital)
+		// console.log(numAnalog)
+		// console.log(numTemperature)
 
 		let ret = {}
 		if(isBattery) {
@@ -152,4 +152,4 @@ class bovedecoder extends decoder{
 }
 
 
-module.exports =  new bovedecoder()
+module.exports =  new vipimodecoder()

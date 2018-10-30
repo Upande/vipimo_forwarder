@@ -66,33 +66,32 @@ class vipimoweatherdecoder extends decoder{
 		ret['B'] = (battery/1000).toFixed(4);
 
 		// what units
-		console.log(`pressure: ${pressure}`)
-		pressure = parseInt('0x'+pressure)
+		// console.log(`pressure: ${pressure}`)
 		console.log(`pressure: ${pressure}`)
 		pressure = ~(pressure+1)  // from twos complement
 		ret['P1'] = pressure
 
 
 		console.log(`temp: ${temp}`)
-		temp = parseInt('0x'+temp)
+		// temp = parseInt('0x'+temp)
 		console.log(`temp: ${temp}`)
 		temp = ~(temp+1)  // from twos complement
 		ret['T1'] = temp/1000
 
 		console.log(`bmp_temp: ${temp}`)
-		bmp_temp = parseInt('0x'+bmp_temp)
+		// bmp_temp = parseInt('0x'+bmp_temp)
 		console.log(`bmp_temp: ${temp}`)
 		bmp_temp = ~(bmp_temp+1)  // from twos complement
 		ret['T2'] = bmp_temp/1000
 
 		console.log(`sht_temp: ${sht_temp}`)
-		sht_temp = parseInt('0x'+sht_temp)
+		// sht_temp = parseInt('0x'+sht_temp)
 		console.log(`sht_temp: ${sht_temp}`)
 		sht_temp = ~(sht_temp+1)  // from twos complement
 		ret['T3'] = sht_temp/1000
 
 		console.log(`hum: ${hum}`)
-		hum = parseInt('0x'+hum)
+		// hum = parseInt('0x'+hum)
 		console.log(`hum: ${hum}`)
 		hum = ~(hum+1)  // from twos complement
 		ret['H1'] = hum

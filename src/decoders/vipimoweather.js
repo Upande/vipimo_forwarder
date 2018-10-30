@@ -53,10 +53,10 @@ class vipimoweatherdecoder extends decoder{
 		let nodeNumber = parseInt('0x'+hexstring.substr(4, 2));
 		let rainvalue = parseInt('0x'+hexstring.substr(6, 8)).toString(2);
 		let temp = parseInt('0x'+hexstring.substr(14, 8)).toString(2);
-		let bmp_temp = parseInt('0x'+hexstring.substr(14, 8)).toString(2);
-		let sht_temp = parseInt('0x'+hexstring.substr(14, 8)).toString(2);
-		let hum = parseInt('0x'+hexstring.substr(14, 8)).toString(2);
-		let pressure = parseInt('0x'+hexstring.substr(14, 8)).toString(2);
+		let bmp_temp = parseInt('0x'+hexstring.substr(22, 8)).toString(2);
+		let sht_temp = parseInt('0x'+hexstring.substr(30, 8)).toString(2);
+		let hum = parseInt('0x'+hexstring.substr(38, 8)).toString(2);
+		let pressure = parseInt('0x'+hexstring.substr(46, 8)).toString(2);
 		let battery = hexstring.substr(hexstring.length - 4, 4)
 			
 

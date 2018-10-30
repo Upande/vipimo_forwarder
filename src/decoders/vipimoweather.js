@@ -94,7 +94,7 @@ class vipimoweatherdecoder extends decoder{
 		// hum = parseInt('0x'+hum)
 		console.log(`hum: ${hum}`)
 		hum = ~(hum+1)  // from twos complement
-		ret['H1'] = hum
+		ret['H1'] = hum/1000
 
 
 		console.log(ret)

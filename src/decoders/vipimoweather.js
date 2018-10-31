@@ -61,6 +61,10 @@ class vipimoweatherdecoder extends decoder{
 			
 
 		let ret = {}
+
+		rainvalue = parseInt('0x'+battery)  //in inches
+		ret['R1'] = (rainvalue/1000).toFixed(4);
+
 		// console.log(battery)
 		battery = parseInt('0x'+battery)
 		ret['B'] = (battery/1000).toFixed(4);

@@ -361,6 +361,8 @@ class kcs_forwarder extends parser
 				let rssi = msg.rssi;
 				let datr = msg.datr;
 				let snr = msg.lsnr;
+				let GPS = {lat: msg.lat, long:msg.long}
+				if(GPS.lat === undefined || GPS.long === undefined) GPS = false;
 				let tmp = msg.datr.split('BW')
 				let sf = tmp[0].split('SF')[1]
 				let bandwidth = tmp[1]
@@ -413,7 +415,7 @@ class kcs_forwarder extends parser
 
 					return;
 				}
-				;[err, care] = await to(self.decodev2({Activation, NwkSKey, AppSKey, NodeEncoding, NodeType, data}))
+				;[err, care] = await to(self.decodev2({Activation, NwkSKey, AppSKey, NodeEncoding, NodeType, data, GPS}))
 				if(err) throw err
 
 				care.mac=MAC

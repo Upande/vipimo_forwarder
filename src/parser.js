@@ -138,9 +138,11 @@ class parser
 		let msg = options.data;
 		let NwkSKey  = options.NwkSKey
 		let AppSKey  = options.AppSKey
+		let GPS = options.GPS
 		let NodeType = options.NodeType
 		let NodeEncoding = options.NodeEncoding.toLowerCase()
 
+		console.log(`GPS: ${GPS}`)
 		// console.log(options)
 
 		// console.log(msg)
@@ -168,6 +170,7 @@ class parser
 
 		if(err) throw err
 		care.FrameCounter = FrameCounter
+		if(GPS) care.GPS = GPS
 		// care.Data = FrameCounter
 		// let 
 

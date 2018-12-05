@@ -142,7 +142,7 @@ class parser
 		let NodeType = options.NodeType
 		let NodeEncoding = options.NodeEncoding.toLowerCase()
 
-		console.log(`GPS: ${GPS}`)
+		// console.log(`GPS: ${GPS}`)
 		// console.log(options)
 
 		// console.log(msg)
